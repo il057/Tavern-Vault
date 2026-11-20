@@ -14,6 +14,12 @@ import {
   ChevronRight,
 } from 'lucide-vue-next';
 import AppModal from './AppModal.vue';
+import {
+  isVisualReplace,
+  parseRegexString,
+  unwrapRenderableHtmlBlocks,
+  buildSandboxSrcdoc,
+} from '../utils/regexEngine.js';
 
 const props = defineProps({
   scripts: { type: Array, default: () => [] },
@@ -48,31 +54,11 @@ function onFrameMessage(e) {
   }
 }
 
-function isVisualReplace(str) {
-  if (!str || typeof str !== 'string') return false;
-  return /<(style|div|section|article|table|span|header|main|details|svg|html|body|link|p|h[1-6]|ul|ol)\b/i.test(str);
-}
-
 function classifyScript(script) {
   const rep = (script.replaceString || '').trim();
   if (!rep) return { type: 'strip', label: '隐藏/清除规则', badgeClass: 'stamp-ink' };
   if (isVisualReplace(rep)) return { type: 'html', label: 'HTML 样式渲染', badgeClass: 'stamp-cobalt' };
   return { type: 'text', label: '文本替换', badgeClass: 'stamp-mint' };
-}
-
-function parseRegexString(raw) {
-  if (!raw || typeof raw !== 'string') return null;
-  const trimmed = raw.trim();
-  // Match /pattern/flags
-  const m = trimmed.match(/^\/([\s\S]*)\/([dgimsuvy]*)$/);
-  try {
-    if (m) {
-      return new RegExp(m[1], m[2] || 'g');
-    }
-    return new RegExp(trimmed, 'g');
-  } catch {
-    return null;
-  }
 }
 
 /**
@@ -159,56 +145,7 @@ function buildRenderedHtml(script) {
 }
 
 function buildSrcdoc(html, frameId, theme) {
-  const isDark = theme === 'dark';
-  const bg = isDark ? '#141821' : '#f8fafc';
-  const fg = isDark ? '#e6edf7' : '#1e293b';
-
-  return `<!doctype html>
-<html>
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<style>
-  * { box-sizing: border-box; }
-  html, body {
-    margin: 0;
-    padding: 0;
-    background: ${bg};
-    color: ${fg};
-    font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 14px;
-    line-height: 1.6;
-    overflow-x: auto;
-  }
-  #st-preview-root {
-    padding: 16px;
-    min-height: 80px;
-  }
-  img { max-width: 100%; height: auto; }
-</style>
-</head>
-<body>
-  <div id="st-preview-root">${html}</div>
-  <script>
-    (function() {
-      var frameId = ${JSON.stringify(frameId)};
-      function report() {
-        var root = document.getElementById('st-preview-root');
-        var h = Math.max(
-          root ? root.scrollHeight : 0,
-          document.body ? document.body.scrollHeight : 0
-        );
-        parent.postMessage({ type: 'st-regex-resize', frameId: frameId, height: h + 8 }, '*');
-      }
-      window.addEventListener('load', function() { report(); setTimeout(report, 180); });
-      if (typeof ResizeObserver !== 'undefined') {
-        new ResizeObserver(report).observe(document.body);
-      }
-      setTimeout(report, 60);
-    })();
-  <\/script>
-</body>
-</html>`;
+  return buildSandboxSrcdoc(unwrapRenderableHtmlBlocks(html), frameId, theme);
 }
 
 function getMode(id) {

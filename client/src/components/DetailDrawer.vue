@@ -26,6 +26,7 @@ import {
 } from '../api/vault.js';
 import AppModal from './AppModal.vue';
 import RegexPreviewPanel from './RegexPreviewPanel.vue';
+import GreetingPreviewPanel from './GreetingPreviewPanel.vue';
 
 const props = defineProps({
   itemId: { type: String, default: null },
@@ -44,7 +45,6 @@ const promptSearch = ref('');
 const promptFilter = ref('all'); // 'all' | 'enabled' | 'disabled'
 const promptLimit = ref(60);
 const expandedKey = ref(null);
-const selectedGreeting = ref(0);
 const cssSearch = ref('');
 
 // Raw JSON lazy load
@@ -85,7 +85,6 @@ watch(
     promptFilter.value = 'all';
     promptLimit.value = 60;
     expandedKey.value = null;
-    selectedGreeting.value = 0;
 
     try {
       const res = await fetchItemDetail(id);
@@ -455,28 +454,13 @@ async function confirmDelete() {
 
             <!-- CHARACTER: GREETINGS -->
             <div v-else-if="item.category === 'character' && activeTab === 'greetings'" class="parchment-stack">
-              <div class="greeting-pills">
-                <button
-                  v-for="(g, idx) in allGreetings"
-                  :key="idx"
-                  class="skeuo-btn skeuo-btn-paper"
-                  :class="{ 'active-pill': selectedGreeting === idx }"
-                  @click="selectedGreeting = idx"
-                >
-                  {{ g.title }}
-                </button>
-              </div>
-              <div v-if="allGreetings[selectedGreeting]" class="parchment-block">
-                <div class="block-bar">
-                  <h4>{{ allGreetings[selectedGreeting].title }}</h4>
-                  <button class="skeuo-btn skeuo-btn-paper mini-btn" @click="copyText(allGreetings[selectedGreeting].text, 'greeting')">
-                    <Check v-if="copiedKey === 'greeting'" :size="13" />
-                    <Copy v-else :size="13" />
-                    <span>{{ copiedKey === 'greeting' ? '已复制' : '复制' }}</span>
-                  </button>
-                </div>
-                <pre class="prose-pre">{{ allGreetings[selectedGreeting].text }}</pre>
-              </div>
+              <GreetingPreviewPanel
+                :greetings="allGreetings"
+                :scripts="detail?.regex_scripts || []"
+                :char-name="detail?.name || item.name"
+                :item-id="item.id"
+                @notify="emit('notify', $event)"
+              />
             </div>
 
             <!-- CHARACTER / WORLDBOOK: ENTRIES -->

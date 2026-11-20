@@ -69,6 +69,11 @@ function buildDetailPayload(row, json) {
           findRegex: r.findRegex || '',
           replaceString: r.replaceString || '',
           disabled: Boolean(r.disabled),
+          placement: Array.isArray(r.placement) ? r.placement : [],
+          trimStrings: Array.isArray(r.trimStrings) ? r.trimStrings : [],
+          markdownOnly: Boolean(r.markdownOnly),
+          promptOnly: Boolean(r.promptOnly),
+          substituteRegex: r.substituteRegex ?? 0,
         }))
       : [];
 
@@ -203,6 +208,11 @@ function buildDetailPayload(row, json) {
         findRegex: r.findRegex || '',
         replaceString: r.replaceString || '',
         disabled: Boolean(r.disabled),
+        placement: Array.isArray(r.placement) ? r.placement : [],
+        trimStrings: Array.isArray(r.trimStrings) ? r.trimStrings : [],
+        markdownOnly: Boolean(r.markdownOnly),
+        promptOnly: Boolean(r.promptOnly),
+        substituteRegex: r.substituteRegex ?? 0,
       })),
     };
   }
