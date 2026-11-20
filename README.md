@@ -105,10 +105,10 @@ docker compose up -d --build
 
 ## 数据备份与迁移
 
-所有用户数据均保存在项目根目录的 `data/` 文件夹下：
+默认情况下，所有用户数据均保存在项目根目录的 `data/` 文件夹下（如需自定义存储位置，可通过环境变量 `VAULT_DATA_DIR` 指定）：
 
-- `data/vault.db`：SQLite 元数据索引数据库
+- `data/vault.db`：SQLite 元数据索引数据库（启用 WAL 模式，运行期间可能存在 `vault.db-wal` / `vault.db-shm`）
 - `data/files/`：所有导入的原始 `.png` / `.json` 文件
 - `data/covers/`：角色卡与档案封面图
 
-只需定期备份 `data/` 目录即可完成完整备份与迁移。
+建议在停止服务后备份或迁移整个 `data/` 目录，即可完成完整备份与恢复。

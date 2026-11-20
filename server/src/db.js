@@ -6,7 +6,7 @@ import { DatabaseSync } from 'node:sqlite';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const DATA_DIR = process.env.VAULT_DATA_DIR
   ? path.resolve(process.env.VAULT_DATA_DIR)
-  : path.resolve(__dirname, '../../../data');
+  : path.resolve(__dirname, '../../data');
 
 export const FILES_DIR = path.join(DATA_DIR, 'files');
 export const COVERS_DIR = path.join(DATA_DIR, 'covers');

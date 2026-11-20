@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import express from 'express';
 import cors from 'cors';
 import itemsRouter from './routes/items.js';
+import { DATA_DIR } from './db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT || 3456);
@@ -41,5 +42,6 @@ app.use((err, _req, res, _next) => {
 
 app.listen(PORT, HOST, () => {
   console.log(`\n  ✦ Tavern Vault (酒馆典藏柜) 已启动`);
-  console.log(`  ✦ 本地访问地址: http://localhost:${PORT}\n`);
+  console.log(`  ✦ 本地访问地址: http://localhost:${PORT}`);
+  console.log(`  ✦ 数据存储目录: ${DATA_DIR}\n`);
 });
