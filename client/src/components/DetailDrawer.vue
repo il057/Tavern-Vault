@@ -313,10 +313,10 @@ async function handleDelete() {
           <header class="drawer-header">
             <div class="dh-left">
               <div class="dh-badges">
-                <span class="stamp-badge" :class="item.format === 'png' ? 'stamp-wax' : 'stamp-brass'">
+                <span class="stamp-badge" :class="item.format === 'png' ? 'stamp-vermilion' : 'stamp-cobalt'">
                   {{ item.format.toUpperCase() }}
                 </span>
-                <span v-if="detail?.spec" class="stamp-badge stamp-brass">{{ detail.spec }}</span>
+                <span v-if="detail?.spec" class="stamp-badge stamp-cobalt">{{ detail.spec }}</span>
                 <span class="dh-size">{{ formatBytes(item.file_size) }}</span>
               </div>
               <h2 class="dh-title">{{ item.name }}</h2>
@@ -329,9 +329,9 @@ async function handleDelete() {
 
             <div class="dh-actions">
               <button class="skeuo-btn" :class="{ 'fav-on': item.favorite }" title="收藏" @click="toggleFav">
-                <Star :size="15" :fill="item.favorite ? '#fbbf24' : 'none'" :color="item.favorite ? '#fbbf24' : 'currentColor'" />
+                <Star :size="15" :fill="item.favorite ? '#f59f00' : 'none'" :color="item.favorite ? '#f59f00' : 'currentColor'" />
               </button>
-              <a :href="getDownloadUrl(item.id)" class="skeuo-btn skeuo-btn-brass">
+              <a :href="getDownloadUrl(item.id)" class="skeuo-btn skeuo-btn-primary">
                 <Download :size="14" />
                 <span>下载原件</span>
               </a>
@@ -477,7 +477,7 @@ async function handleDelete() {
                     <div class="entry-title-group">
                       <span class="led-dot" :class="!e.enabled ? 'led-off' : (e.constant ? 'led-amber' : 'led-green')"></span>
                       <strong>{{ e.comment }}</strong>
-                      <span v-if="e.constant" class="stamp-badge stamp-brass">常驻</span>
+                      <span v-if="e.constant" class="stamp-badge stamp-cobalt">常驻</span>
                     </div>
                     <div class="entry-keys">
                       <span v-for="k in (e.keys || []).slice(0, 4)" :key="k" class="key-chip">{{ k }}</span>
@@ -551,7 +551,7 @@ async function handleDelete() {
                       <span class="led-dot" :class="p.enabled ? 'led-green' : 'led-off'"></span>
                       <strong>{{ p.name }}</strong>
                       <span class="stamp-badge stamp-ink">{{ p.role }}</span>
-                      <span v-if="p.marker" class="stamp-badge stamp-brass">Marker</span>
+                      <span v-if="p.marker" class="stamp-badge stamp-cobalt">Marker</span>
                     </div>
                     <span class="mono-meta">Depth {{ p.injection_depth }} · Order {{ p.injection_order }}</span>
                   </div>
@@ -694,7 +694,7 @@ async function handleDelete() {
                   <input v-model="editForm.version" type="text" class="paper-input" />
                 </label>
                 <label class="edit-field">
-                  <span>档案抽屉（文件夹）</span>
+                  <span>收藏分组（文件夹）</span>
                   <input v-model="editForm.folder" type="text" placeholder="留空表示不归类" class="paper-input" />
                 </label>
                 <label class="edit-field">
@@ -707,7 +707,7 @@ async function handleDelete() {
                 </label>
               </div>
               <div style="display: flex; justify-content: flex-end">
-                <button class="skeuo-btn skeuo-btn-brass" :disabled="savingEdit" @click="saveEdit">
+                <button class="skeuo-btn skeuo-btn-primary" :disabled="savingEdit" @click="saveEdit">
                   <Save :size="14" />
                   <span>{{ savingEdit ? '保存中…' : '保存修改' }}</span>
                 </button>
@@ -740,7 +740,7 @@ async function handleDelete() {
 .drawer-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(10, 7, 5, 0.72);
+  background: rgba(15, 23, 42, 0.42);
   backdrop-filter: blur(4px);
   display: flex;
   justify-content: flex-end;
@@ -752,22 +752,22 @@ async function handleDelete() {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #241a15;
-  border-left: 3px solid #5a4332;
-  box-shadow: -16px 0 48px rgba(0, 0, 0, 0.75);
+  background: #ffffff;
+  border-left: 1px solid var(--border-mid);
+  box-shadow: -16px 0 48px rgba(15, 23, 42, 0.18);
 }
 
 .drawer-loading {
   padding: 60px;
   text-align: center;
-  color: #cbb79e;
+  color: var(--ink-secondary);
   font-size: 14px;
 }
 
 .drawer-header {
   padding: 18px 24px 14px;
-  background: linear-gradient(180deg, #362820 0%, #261c16 100%);
-  border-bottom: 1px solid #140e0b;
+  background: #ffffff;
+  border-bottom: 1px solid var(--border-light);
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -785,20 +785,21 @@ async function handleDelete() {
 .dh-size {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: #bba68e;
+  color: var(--ink-muted);
 }
 
 .dh-title {
   margin: 0;
-  font-family: var(--font-serif);
-  font-size: 21px;
-  color: #f7ebd7;
+  font-family: var(--font-sans);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink-primary);
 }
 
 .dh-sub {
   margin-top: 4px;
   font-size: 12px;
-  color: #b49e88;
+  color: var(--ink-secondary);
 }
 
 .dh-actions {
@@ -808,46 +809,50 @@ async function handleDelete() {
   flex-wrap: wrap;
 }
 
-/* Physical Tab Dividers */
+/* Studio Folder Tab Dividers */
 .folio-tabs {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   padding: 10px 24px 0;
-  background: #1d1511;
-  border-bottom: 2px solid #b59e7d;
+  background: #f1f5f9;
+  border-bottom: 1px solid var(--border-mid);
   overflow-x: auto;
 }
 
 .folio-tab {
   padding: 8px 15px;
-  border: 1px solid #4a392d;
+  border: 1px solid transparent;
   border-bottom: none;
   border-radius: 8px 8px 0 0;
-  background: linear-gradient(180deg, #3a2c23 0%, #2b201a 100%);
-  color: #cbb8a2;
+  background: transparent;
+  color: var(--ink-secondary);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  transition: all 0.14s ease;
+}
+
+.folio-tab:hover {
+  color: var(--ink-primary);
+  background: rgba(255, 255, 255, 0.55);
 }
 
 .folio-tab.active {
-  color: var(--paper-ink);
-  background: linear-gradient(180deg, #f8f2e6 0%, #efe4d0 100%);
-  border-color: #b59e7d;
-  margin-bottom: -2px;
-  padding-bottom: 10px;
+  color: var(--accent-cobalt);
+  background: #f8fafc;
+  border-color: var(--border-mid);
+  margin-bottom: -1px;
+  padding-bottom: 9px;
 }
 
-/* Parchment Interior */
+/* Clean Studio Dossier Interior */
 .folio-body {
   flex: 1;
   overflow-y: auto;
-  padding: 22px 26px 32px;
-  color: var(--paper-ink);
-  background:
-    radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.45), transparent 50%),
-    linear-gradient(180deg, #f3ead9 0%, #e7dac2 100%);
+  padding: 22px 26px 36px;
+  color: var(--ink-primary);
+  background: #f8fafc;
 }
 
 .parchment-stack {
@@ -867,11 +872,13 @@ async function handleDelete() {
   width: 190px;
   height: 256px;
   flex-shrink: 0;
-  border-radius: 9px;
+  border-radius: 10px;
   overflow: hidden;
-  border: 3px solid #ad9572;
-  background: #231914;
-  box-shadow: 0 6px 16px rgba(45, 30, 15, 0.35);
+  border: 3px solid #ffffff;
+  background: #e2e8f0;
+  box-shadow:
+    0 0 0 1px var(--border-mid),
+    0 8px 20px rgba(15, 23, 42, 0.12);
   cursor: pointer;
 }
 
@@ -889,7 +896,7 @@ async function handleDelete() {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  color: #b8a38b;
+  color: var(--ink-muted);
   font-size: 12px;
   text-align: center;
   padding: 12px;
@@ -902,7 +909,7 @@ async function handleDelete() {
   text-align: center;
   font-size: 12px;
   color: #fff;
-  background: rgba(20, 14, 10, 0.72);
+  background: rgba(15, 23, 42, 0.72);
   opacity: 0;
   transition: opacity 0.15s ease;
 }
@@ -928,24 +935,26 @@ async function handleDelete() {
 .note-callout {
   padding: 10px 14px;
   border-radius: 8px;
-  background: rgba(201, 154, 78, 0.18);
-  border: 1px solid rgba(155, 112, 42, 0.45);
+  background: var(--accent-cobalt-soft);
+  border: 1px solid var(--accent-cobalt-border);
+  color: #1e3a8a;
   font-size: 13px;
 }
 
 .parchment-block {
-  padding: 14px 16px;
+  padding: 15px 17px;
   border-radius: 10px;
-  background: rgba(255, 252, 245, 0.65);
-  border: 1px solid #cab89a;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 2px 6px rgba(55, 40, 20, 0.08);
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
 .parchment-block h4 {
   margin: 0 0 9px;
-  font-family: var(--font-serif);
-  font-size: 14.5px;
-  color: #463423;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-primary);
 }
 
 .prose-pre {
@@ -955,7 +964,7 @@ async function handleDelete() {
   font-family: var(--font-sans);
   font-size: 13.5px;
   line-height: 1.72;
-  color: #2f241a;
+  color: #334155;
 }
 
 .greeting-pills {
@@ -965,8 +974,9 @@ async function handleDelete() {
 }
 
 .active-pill {
-  background: linear-gradient(180deg, #f3d79e 0%, #c89648 100%) !important;
-  border-color: #7d561d !important;
+  color: #ffffff !important;
+  background: var(--accent-cobalt) !important;
+  border-color: #2b44b8 !important;
 }
 
 .block-bar {
@@ -988,9 +998,15 @@ async function handleDelete() {
   padding: 0 12px;
   height: 38px;
   border-radius: 8px;
-  background: rgba(255, 252, 246, 0.85);
-  border: 1px solid #b59e7d;
-  box-shadow: inset 0 2px 4px rgba(70, 52, 32, 0.14);
+  background: #ffffff;
+  border: 1px solid var(--border-mid);
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05);
+  color: var(--ink-muted);
+}
+
+.inline-search:focus-within {
+  border-color: var(--accent-cobalt);
+  box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.12);
 }
 
 .inline-search input {
@@ -999,13 +1015,13 @@ async function handleDelete() {
   outline: none;
   background: transparent;
   font-size: 13px;
-  color: var(--paper-ink);
+  color: var(--ink-primary);
 }
 
 .count-hint {
   font-family: var(--font-mono);
   font-size: 11.5px;
-  color: #7a6650;
+  color: var(--ink-muted);
 }
 
 .prompt-toolbar {
@@ -1023,9 +1039,10 @@ async function handleDelete() {
 
 .entry-card {
   border-radius: 9px;
-  background: rgba(255, 252, 245, 0.78);
-  border: 1px solid #c6b395;
+  background: #ffffff;
+  border: 1px solid var(--border-light);
   overflow: hidden;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
 }
 
 .entry-head {
@@ -1039,7 +1056,7 @@ async function handleDelete() {
 }
 
 .entry-head:hover {
-  background: rgba(201, 154, 78, 0.12);
+  background: #f8fafc;
 }
 
 .entry-title-group {
@@ -1047,6 +1064,7 @@ async function handleDelete() {
   align-items: center;
   gap: 8px;
   font-size: 13.5px;
+  color: var(--ink-primary);
 }
 
 .entry-keys {
@@ -1057,35 +1075,35 @@ async function handleDelete() {
 
 .key-chip {
   font-size: 11px;
-  padding: 1px 7px;
+  padding: 2px 7px;
   border-radius: 5px;
-  background: rgba(130, 102, 68, 0.15);
-  color: #5d4935;
+  background: var(--surface-well);
+  color: var(--ink-secondary);
 }
 
 .entry-body {
   padding: 12px 14px;
-  border-top: 1px dashed #cbb89a;
-  background: rgba(246, 239, 226, 0.6);
+  border-top: 1px dashed var(--border-light);
+  background: #fafbfd;
 }
 
 .regex-code {
   padding: 0 13px 10px;
   font-size: 12px;
-  color: #6b5540;
+  color: var(--ink-secondary);
 }
 
 .mono-meta {
   font-family: var(--font-mono);
   font-size: 11.5px;
-  color: #7a6650;
+  color: var(--ink-muted);
 }
 
-/* Preset Params LCD */
+/* Preset Params OLED Grid */
 .param-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
-  gap: 12px;
+  gap: 10px;
   padding: 16px;
 }
 
@@ -1095,29 +1113,30 @@ async function handleDelete() {
   gap: 4px;
   padding: 8px 10px;
   border-radius: 6px;
-  background: rgba(0, 0, 0, 0.28);
-  border: 1px solid rgba(155, 232, 184, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(125, 211, 252, 0.14);
 }
 
 .param-k {
   font-size: 10.5px;
-  color: #6ba581;
+  color: #94a3b8;
 }
 
 .param-v {
   font-size: 14px;
   font-weight: 600;
+  color: #7dd3fc;
 }
 
 /* Theme Live Preview */
 .theme-stage {
   padding: 18px;
   border-radius: 11px;
-  border: 2px solid #9d8564;
+  border: 1px solid var(--border-mid);
   display: flex;
   flex-direction: column;
   gap: 12px;
-  box-shadow: inset 0 3px 12px rgba(0, 0, 0, 0.65);
+  box-shadow: inset 0 2px 10px rgba(15, 23, 42, 0.35);
 }
 
 .stage-msg {
@@ -1151,14 +1170,16 @@ async function handleDelete() {
   gap: 10px;
   padding: 8px 10px;
   border-radius: 8px;
-  border: 1px solid #c6b395;
-  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--border-light);
+  background: #f8fafc;
   cursor: pointer;
   text-align: left;
+  transition: all 0.12s ease;
 }
 
 .swatch-tile:hover {
-  background: #fff;
+  background: #ffffff;
+  border-color: var(--border-strong);
 }
 
 .tile-dot {
@@ -1166,7 +1187,7 @@ async function handleDelete() {
   height: 26px;
   border-radius: 50%;
   border: 2px solid #fff;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.12), 0 2px 5px rgba(15, 23, 42, 0.18);
   flex-shrink: 0;
 }
 
@@ -1178,13 +1199,13 @@ async function handleDelete() {
 
 .tile-k {
   font-size: 11px;
-  color: #705b45;
+  color: var(--ink-muted);
 }
 
 .tile-v {
   font-family: var(--font-mono);
   font-size: 11.5px;
-  color: #2b2118;
+  color: var(--ink-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1202,22 +1223,22 @@ async function handleDelete() {
   gap: 8px;
   font-family: var(--font-mono);
   font-size: 12px;
-  color: #463626;
+  color: var(--ink-secondary);
 }
 
 .code-well {
   margin: 0;
   padding: 14px 16px;
-  border-radius: 9px;
-  background: #171311;
-  color: #e6dac8;
+  border-radius: 10px;
+  background: #141a24;
+  color: #e2e8f0;
   font-family: var(--font-mono);
   font-size: 12px;
   line-height: 1.6;
   overflow-x: auto;
   max-height: 62vh;
-  border: 1px solid #0e0a08;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
+  border: 1px solid #0b0f17;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.45);
 }
 
 /* Edit Form */
@@ -1233,7 +1254,7 @@ async function handleDelete() {
   gap: 6px;
   font-size: 12.5px;
   font-weight: 600;
-  color: #54412f;
+  color: var(--ink-secondary);
 }
 
 .full-span {
@@ -1244,17 +1265,18 @@ async function handleDelete() {
   width: 100%;
   padding: 9px 11px;
   border-radius: 8px;
-  border: 1px solid #b59e7d;
-  background: rgba(255, 253, 248, 0.9);
-  color: var(--paper-ink);
+  border: 1px solid var(--border-mid);
+  background: #ffffff;
+  color: var(--ink-primary);
   font-family: inherit;
   font-size: 13.5px;
-  box-shadow: inset 0 2px 4px rgba(70, 52, 32, 0.14);
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05);
   outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .paper-input:focus {
-  border-color: #9e6e24;
-  box-shadow: inset 0 2px 4px rgba(70, 52, 32, 0.14), 0 0 0 2px rgba(201, 154, 78, 0.25);
+  border-color: var(--accent-cobalt);
+  box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.13);
 }
 </style>

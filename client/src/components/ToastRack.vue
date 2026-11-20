@@ -30,19 +30,19 @@ defineProps({
   align-items: center;
   gap: 9px;
   padding: 10px 16px;
-  border-radius: 9px;
+  border-radius: 10px;
   font-size: 13px;
   font-weight: 500;
-  color: #f6ead7;
-  background: linear-gradient(180deg, #3c2e26 0%, #241b16 100%);
-  border: 1px solid #6a523e;
+  color: #f8fafc;
+  background: linear-gradient(180deg, #1f2736 0%, #141a24 100%);
+  border: 1px solid #2e394d;
   box-shadow:
-    inset 0 1px 0 rgba(255, 236, 204, 0.22),
-    0 8px 22px rgba(0, 0, 0, 0.55);
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 10px 26px rgba(15, 23, 42, 0.28);
 }
 
 .toast-plaque.error {
-  border-color: #b54547;
-  color: #ffd6d6;
+  border-color: #e03131;
+  color: #ffe3e3;
 }
 </style>

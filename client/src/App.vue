@@ -32,19 +32,19 @@ const selectedItemId = ref(null);
 const toasts = ref([]);
 
 const categoryTitles = {
-  all: '全部典藏',
-  character: '角色卡典藏',
+  all: '全部档案',
+  character: '角色卡墙',
   preset: '对话预设库',
-  theme: '界面主题库',
+  theme: '界面主题色卡',
   worldbook: '独立世界书',
   other: '正则与扩展',
 };
 
 const activeTitle = computed(() => {
   if (onlyFavorites.value) return '星标珍藏';
-  if (activeFolder.value) return `抽屉：${activeFolder.value}`;
+  if (activeFolder.value) return `分组：${activeFolder.value}`;
   if (activeTag.value) return `标签：#${activeTag.value}`;
-  return categoryTitles[activeCategory.value] || '全部典藏';
+  return categoryTitles[activeCategory.value] || '全部档案';
 });
 
 function notify({ type = 'success', text }) {
@@ -154,7 +154,7 @@ function handleItemDeleted() {
 </script>
 
 <template>
-  <div class="vault-shell wood-desk">
+  <div class="vault-shell board-canvas">
     <SidebarNav
       :stats="stats"
       :active-category="activeCategory"
@@ -180,7 +180,7 @@ function handleItemDeleted() {
       <!-- Active Filter Bar -->
       <div v-if="activeFolder || activeTag" class="filter-strip">
         <span v-if="activeFolder" class="active-chip">
-          抽屉：{{ activeFolder }}
+          分组：{{ activeFolder }}
           <button @click="activeFolder = ''"><X :size="12" /></button>
         </span>
         <span v-if="activeTag" class="active-chip">
@@ -189,19 +189,20 @@ function handleItemDeleted() {
         </span>
       </div>
 
-      <!-- Vault Shelf Content -->
-      <section class="shelf-scroll">
+      <!-- Bulletin Board Content -->
+      <section class="board-scroll">
         <div v-if="loading && items.length === 0" class="empty-well">
-          <p>正在开启典藏柜…</p>
+          <p class="loading-text">正在整理档案公告板…</p>
         </div>
 
         <div v-else-if="items.length === 0" class="empty-well">
-          <div class="empty-plaque">
-            <h3>典藏柜中尚无匹配档案</h3>
+          <div class="empty-plaque paper-card">
+            <span class="pin-magnet pin-cobalt"></span>
+            <h3>公告板上尚无匹配档案</h3>
             <p>支持直接导入 SillyTavern 角色卡（.png / .json）、对话预设、界面主题、世界书及正则脚本。</p>
-            <button class="skeuo-btn skeuo-btn-brass" @click="uploadOpen = true">
+            <button class="skeuo-btn skeuo-btn-primary" @click="uploadOpen = true">
               <Upload :size="15" />
-              <span>立即导入第一份档案</span>
+              <span>立即贴入第一份档案</span>
             </button>
           </div>
         </div>
@@ -253,19 +254,20 @@ function handleItemDeleted() {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 24px 0;
+  padding: 12px 26px 0;
 }
 
 .active-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  padding: 4px 11px;
   border-radius: 999px;
   font-size: 12px;
-  color: #2b1a06;
-  background: linear-gradient(180deg, #f2d599 0%, #c89648 100%);
-  border: 1px solid #7d561d;
+  color: #ffffff;
+  background: var(--accent-cobalt);
+  border: 1px solid #2b44b8;
+  box-shadow: 0 2px 6px rgba(59, 91, 219, 0.22);
   font-weight: 600;
 }
 
@@ -276,18 +278,23 @@ function handleItemDeleted() {
   display: inline-flex;
   cursor: pointer;
   padding: 0;
+  opacity: 0.85;
 }
 
-.shelf-scroll {
+.active-chip button:hover {
+  opacity: 1;
+}
+
+.board-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 22px 24px 40px;
+  padding: 26px 26px 44px;
 }
 
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(272px, 1fr));
+  gap: 24px 20px;
   align-items: stretch;
 }
 
@@ -295,7 +302,7 @@ function handleItemDeleted() {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-width: 1100px;
+  max-width: 1120px;
 }
 
 .empty-well {
@@ -306,30 +313,33 @@ function handleItemDeleted() {
   justify-content: center;
 }
 
+.loading-text {
+  color: var(--ink-secondary);
+  font-size: 14px;
+}
+
 .empty-plaque {
   max-width: 440px;
-  padding: 32px 28px;
+  padding: 36px 30px 30px;
   text-align: center;
-  border-radius: 14px;
-  background: linear-gradient(180deg, rgba(48, 35, 28, 0.9) 0%, rgba(30, 22, 17, 0.95) 100%);
-  border: 1px solid #594434;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 236, 204, 0.14),
-    0 16px 40px rgba(0, 0, 0, 0.55);
+}
+
+.empty-plaque:hover {
+  transform: none;
 }
 
 .empty-plaque h3 {
   margin: 0 0 8px;
-  font-family: var(--font-serif);
-  font-size: 19px;
-  color: #f3e4c9;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink-primary);
 }
 
 .empty-plaque p {
-  margin: 0 0 20px;
+  margin: 0 0 22px;
   font-size: 13px;
   line-height: 1.65;
-  color: #b7a38e;
+  color: var(--ink-secondary);
 }
 
 @media (max-width: 820px) {

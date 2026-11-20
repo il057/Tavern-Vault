@@ -24,7 +24,7 @@ defineProps({
 const emit = defineEmits(['select-category', 'toggle-favorites', 'select-folder', 'select-tag']);
 
 const navItems = [
-  { key: 'all', label: '全部典藏', icon: Archive },
+  { key: 'all', label: '全部档案', icon: Archive },
   { key: 'character', label: '角色卡', icon: UserSquare2 },
   { key: 'preset', label: '对话预设', icon: Sliders },
   { key: 'theme', label: '界面主题', icon: Palette },
@@ -34,20 +34,24 @@ const navItems = [
 </script>
 
 <template>
-  <aside class="leather-panel sidebar">
-    <!-- Brushed Brass Nameplate -->
-    <div class="brass-plate nameplate">
-      <span class="brass-rivet rivet-tl"></span>
-      <span class="brass-rivet rivet-tr"></span>
-      <span class="brass-rivet rivet-bl"></span>
-      <span class="brass-rivet rivet-br"></span>
+  <aside class="rail-panel sidebar">
+    <!-- Modern Architectural Studio Plaque -->
+    <div class="studio-plaque nameplate">
+      <span class="studio-pin-screw screw-tl"></span>
+      <span class="studio-pin-screw screw-tr"></span>
+      <span class="studio-pin-screw screw-bl"></span>
+      <span class="studio-pin-screw screw-br"></span>
+      <div class="plate-badge">
+        <span class="plate-dot"></span>
+        <span>ARCHIVE BOARD</span>
+      </div>
       <div class="plate-title">TAVERN VAULT</div>
-      <div class="plate-sub">酒馆典藏柜 · 本地档案库</div>
+      <div class="plate-sub">酒馆档案墙 · 本地收藏库</div>
     </div>
 
     <!-- Category Index Tabs -->
     <div class="nav-section">
-      <div class="section-label">典藏分类</div>
+      <div class="section-label">档案分区</div>
       <nav class="nav-list">
         <button
           v-for="item in navItems"
@@ -79,7 +83,7 @@ const navItems = [
 
     <!-- Folders / Collections -->
     <div v-if="stats.folders && stats.folders.length" class="nav-section">
-      <div class="section-label">档案抽屉</div>
+      <div class="section-label">收藏分组</div>
       <div class="nav-list">
         <button
           v-for="f in stats.folders"
@@ -99,12 +103,12 @@ const navItems = [
 
     <!-- Tags -->
     <div v-if="stats.tags && stats.tags.length" class="nav-section tags-section">
-      <div class="section-label">索引标签</div>
+      <div class="section-label">索引贴纸</div>
       <div class="tag-cloud">
         <button
           v-for="t in stats.tags.slice(0, 24)"
           :key="t.name"
-          class="leather-tag"
+          class="sticker-tag"
           :class="{ active: activeTag === t.name }"
           @click="emit('select-tag', activeTag === t.name ? '' : t.name)"
         >
@@ -134,99 +138,137 @@ const navItems = [
 
 <style scoped>
 .sidebar {
-  width: 264px;
+  width: 262px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  padding: 20px 18px 18px;
+  padding: 18px 16px 16px;
   gap: 18px;
   overflow-y: auto;
-  z-index: 2;
+  z-index: 6;
 }
 
 .nameplate {
-  padding: 14px 16px;
+  padding: 14px 16px 13px;
   text-align: center;
 }
 
-.plate-title {
-  font-family: var(--font-serif);
-  font-weight: 900;
-  font-size: 16px;
+.plate-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
   letter-spacing: 0.14em;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+
+.plate-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-vermilion);
+  box-shadow: 0 0 6px rgba(232, 89, 12, 0.75);
+}
+
+.plate-title {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 15.5px;
+  letter-spacing: 0.14em;
+  color: #f8fafc;
 }
 
 .plate-sub {
   margin-top: 3px;
   font-size: 11px;
-  font-weight: 600;
-  opacity: 0.82;
-  letter-spacing: 0.08em;
+  font-weight: 500;
+  color: #94a3b8;
+  letter-spacing: 0.06em;
 }
 
-.rivet-tl,
-.rivet-tr,
-.rivet-bl,
-.rivet-br {
+.screw-tl,
+.screw-tr,
+.screw-bl,
+.screw-br {
   position: absolute;
 }
-.rivet-tl { top: 6px; left: 6px; }
-.rivet-tr { top: 6px; right: 6px; }
-.rivet-bl { bottom: 6px; left: 6px; }
-.rivet-br { bottom: 6px; right: 6px; }
+.screw-tl { top: 7px; left: 7px; }
+.screw-tr { top: 7px; right: 7px; }
+.screw-bl { bottom: 7px; left: 7px; }
+.screw-br { bottom: 7px; right: 7px; }
 
 .nav-section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .section-label {
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.12em;
-  color: #a9927a;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
   text-transform: uppercase;
-  padding: 0 6px;
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.7);
+  padding: 0 8px;
 }
 
 .nav-list {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 3px;
 }
 
 .nav-tab {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 9px 11px;
+  padding: 8.5px 11px;
   border-radius: 8px;
   border: 1px solid transparent;
   background: transparent;
-  color: #d9cbb9;
+  color: var(--ink-secondary);
   font-size: 13.5px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.14s ease;
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.65);
 }
 
 .nav-tab:hover {
-  background: rgba(255, 232, 198, 0.06);
-  border-color: rgba(255, 232, 198, 0.08);
-  color: #fff6ea;
+  background: #edf2f8;
+  color: var(--ink-primary);
 }
 
 .nav-tab.active {
-  color: #f6dfad;
-  background: linear-gradient(180deg, #1b130f 0%, #261b15 100%);
-  border: 1px solid #0f0a08;
-  box-shadow:
-    inset 0 2px 5px rgba(0, 0, 0, 0.75),
-    0 1px 0 rgba(255, 232, 198, 0.14);
+  color: var(--accent-cobalt);
+  background: var(--accent-cobalt-soft);
+  border-color: var(--accent-cobalt-border);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(59, 91, 219, 0.08);
+}
+
+.nav-tab.active::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent-cobalt);
+}
+
+.fav-tab.active {
+  color: #d9480f;
+  background: var(--accent-vermilion-soft);
+  border-color: var(--accent-vermilion-border);
+}
+
+.fav-tab.active::before {
+  background: var(--accent-vermilion);
 }
 
 .small-tab {
@@ -252,18 +294,21 @@ const navItems = [
   font-size: 11px;
   padding: 1px 7px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 232, 198, 0.12);
-  color: #c9b59c;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+  background: #eaf0f7;
+  border: 1px solid #dce4ef;
+  color: var(--ink-secondary);
 }
 
 .nav-tab.active .tab-count {
-  color: #2c1a06;
-  background: linear-gradient(180deg, #efd297 0%, #c8974b 100%);
-  border-color: #6b4917;
-  box-shadow: inset 0 1px 0 rgba(255, 250, 230, 0.75);
-  font-weight: 700;
+  color: #ffffff;
+  background: var(--accent-cobalt);
+  border-color: #2b44b8;
+  font-weight: 600;
+}
+
+.fav-tab.active .tab-count {
+  background: var(--accent-vermilion);
+  border-color: #c2410c;
 }
 
 .tags-section {
@@ -277,36 +322,36 @@ const navItems = [
   gap: 6px;
 }
 
-.leather-tag {
+.sticker-tag {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 4px 8px;
   font-size: 11.5px;
-  color: #d6c4ae;
-  background: linear-gradient(180deg, #3c2e25 0%, #2c211b 100%);
-  border: 1px solid #16100c;
+  color: var(--ink-secondary);
+  background: #ffffff;
+  border: 1px solid var(--border-mid);
   border-radius: 6px;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 234, 200, 0.16),
-    0 2px 3px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   cursor: pointer;
   transition: all 0.12s ease;
 }
 
-.leather-tag:hover {
-  filter: brightness(1.12);
+.sticker-tag:hover {
+  border-color: var(--border-strong);
+  color: var(--ink-primary);
+  transform: translateY(-1px);
 }
 
-.leather-tag.active {
-  color: #2b1a06;
-  background: linear-gradient(180deg, #f2d599 0%, #c89648 100%);
-  border-color: #6b4917;
+.sticker-tag.active {
+  color: #ffffff;
+  background: var(--accent-cobalt);
+  border-color: #2b44b8;
   font-weight: 600;
 }
 
-.leather-tag small {
-  opacity: 0.7;
+.sticker-tag small {
+  opacity: 0.72;
   font-family: var(--font-mono);
   font-size: 10px;
 }
@@ -330,13 +375,13 @@ const navItems = [
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #b7a38e;
+  color: var(--ink-secondary);
 }
 
 .gauge-value {
   font-family: var(--font-mono);
-  font-weight: 600;
-  color: #f0d399;
+  font-weight: 700;
+  color: var(--ink-primary);
 }
 
 .gauge-meta {
@@ -344,6 +389,6 @@ const navItems = [
   align-items: center;
   gap: 7px;
   font-size: 11px;
-  color: #93806e;
+  color: var(--ink-muted);
 }
 </style>

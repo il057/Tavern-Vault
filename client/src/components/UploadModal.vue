@@ -78,9 +78,9 @@ async function submitUpload() {
           </button>
         </div>
 
-        <!-- Felt-Lined Drop Tray -->
+        <!-- Studio Pinboard Drop Zone -->
         <div
-          class="felt-tray"
+          class="drop-tray"
           :class="{ dragging: isDragging }"
           @dragover.prevent="isDragging = true"
           @dragleave.prevent="isDragging = false"
@@ -95,8 +95,8 @@ async function submitUpload() {
             style="display: none"
             @change="addFiles($event.target.files); $event.target.value = ''"
           />
-          <UploadCloud :size="38" class="tray-icon" />
-          <div class="tray-title">拖拽文件至此托盘，或点击选择文件</div>
+          <UploadCloud :size="36" class="tray-icon" />
+          <div class="tray-title">拖拽文件至此区域，或点击选择文件</div>
           <div class="tray-hint">支持批量导入 · 单文件最大 100 MB · 自动识别角色卡 / 预设 / 主题 / 世界书</div>
         </div>
 
@@ -130,7 +130,7 @@ async function submitUpload() {
           </label>
 
           <label class="field-box">
-            <span>归入抽屉（可选）</span>
+            <span>归入分组（可选）</span>
             <input
               v-model="folder"
               type="text"
@@ -158,12 +158,12 @@ async function submitUpload() {
         <div class="folio-actions">
           <button class="skeuo-btn" @click="emit('close')">取消</button>
           <button
-            class="skeuo-btn skeuo-btn-brass"
+            class="skeuo-btn skeuo-btn-primary"
             :disabled="queuedFiles.length === 0 || uploading"
             @click="submitUpload"
           >
             <CheckCircle2 :size="15" />
-            <span>{{ uploading ? '正在解析归档…' : `确认入库 (${queuedFiles.length})` }}</span>
+            <span>{{ uploading ? '正在解析归档…' : `确认贴入 (${queuedFiles.length})` }}</span>
           </button>
         </div>
       </div>
@@ -175,7 +175,7 @@ async function submitUpload() {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(10, 7, 5, 0.76);
+  background: rgba(15, 23, 42, 0.45);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -189,11 +189,9 @@ async function submitUpload() {
   max-width: 600px;
   padding: 22px 24px;
   border-radius: 14px;
-  background: linear-gradient(180deg, #352720 0%, #241a15 100%);
-  border: 2px solid #594333;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 236, 204, 0.2),
-    0 24px 60px rgba(0, 0, 0, 0.72);
+  background: #ffffff;
+  border: 1px solid var(--border-mid);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -208,60 +206,58 @@ async function submitUpload() {
 
 .folio-title {
   margin: 0;
-  font-family: var(--font-serif);
-  font-size: 19px;
-  color: #f4e4c8;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink-primary);
 }
 
 .folio-sub {
   margin: 4px 0 0;
   font-size: 12.5px;
-  color: #b49f89;
+  color: var(--ink-secondary);
 }
 
 .close-btn {
   padding: 6px;
 }
 
-/* Recessed Billiard-Green Felt Tray */
-.felt-tray {
+/* Blueprint Studio Drop Tray */
+.drop-tray {
   padding: 28px 20px;
   border-radius: 11px;
   text-align: center;
   cursor: pointer;
   background:
-    radial-gradient(circle at 50% 35%, rgba(65, 118, 86, 0.35), transparent 70%),
-    linear-gradient(180deg, #16291f 0%, #101f17 100%);
-  border: 2px dashed rgba(212, 169, 106, 0.45);
-  box-shadow:
-    inset 0 4px 14px rgba(0, 0, 0, 0.75),
-    0 1px 0 rgba(255, 232, 198, 0.16);
+    radial-gradient(rgba(59, 91, 219, 0.1) 1px, transparent 1px),
+    #f6f8ff;
+  background-size: 18px 18px;
+  border: 2px dashed #93b4f8;
   transition: all 0.16s ease;
 }
 
-.felt-tray:hover,
-.felt-tray.dragging {
-  border-color: #f0cf8e;
+.drop-tray:hover,
+.drop-tray.dragging {
+  border-color: var(--accent-cobalt);
   background:
-    radial-gradient(circle at 50% 35%, rgba(84, 152, 110, 0.45), transparent 70%),
-    linear-gradient(180deg, #1b3427 0%, #13251b 100%);
+    radial-gradient(rgba(59, 91, 219, 0.14) 1px, transparent 1px),
+    #edf2ff;
 }
 
 .tray-icon {
-  color: #e6c380;
+  color: var(--accent-cobalt);
   margin-bottom: 8px;
 }
 
 .tray-title {
   font-size: 14.5px;
   font-weight: 600;
-  color: #f4ead9;
+  color: var(--ink-primary);
 }
 
 .tray-hint {
   margin-top: 5px;
   font-size: 12px;
-  color: #9cb8a6;
+  color: var(--ink-secondary);
 }
 
 .queue-list {
@@ -278,9 +274,10 @@ async function submitUpload() {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 6px 8px;
-  border-radius: 6px;
-  background: rgba(255, 236, 204, 0.06);
+  padding: 6px 9px;
+  border-radius: 7px;
+  background: #ffffff;
+  border: 1px solid var(--border-light);
   font-size: 12.5px;
 }
 
@@ -292,7 +289,7 @@ async function submitUpload() {
 }
 
 .q-icon {
-  color: #d9ae62;
+  color: var(--accent-cobalt);
   flex-shrink: 0;
 }
 
@@ -300,20 +297,25 @@ async function submitUpload() {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: var(--ink-primary);
 }
 
 .q-size {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: #a69480;
+  color: var(--ink-muted);
   flex-shrink: 0;
 }
 
 .q-remove {
   border: none;
   background: transparent;
-  color: #c9a993;
+  color: var(--ink-muted);
   cursor: pointer;
+}
+
+.q-remove:hover {
+  color: var(--accent-danger);
 }
 
 .options-grid {
@@ -327,7 +329,8 @@ async function submitUpload() {
   flex-direction: column;
   gap: 6px;
   font-size: 12px;
-  color: #cbb79e;
+  font-weight: 600;
+  color: var(--ink-secondary);
 }
 
 .full-span {
@@ -343,8 +346,8 @@ async function submitUpload() {
 }
 
 .field-input option {
-  background: #231914;
-  color: #f3e8d8;
+  background: #ffffff;
+  color: var(--ink-primary);
 }
 
 .error-bar {
@@ -353,9 +356,9 @@ async function submitUpload() {
   gap: 8px;
   padding: 9px 12px;
   border-radius: 8px;
-  background: rgba(158, 42, 43, 0.25);
-  border: 1px solid rgba(220, 82, 84, 0.55);
-  color: #ffd0d0;
+  background: #fff5f5;
+  border: 1px solid #ffc9c9;
+  color: #c92a2a;
   font-size: 12.5px;
 }
 

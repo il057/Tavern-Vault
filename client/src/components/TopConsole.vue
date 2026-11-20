@@ -6,7 +6,7 @@ defineProps({
   sort: { type: String, default: 'updated_desc' },
   viewMode: { type: String, default: 'grid' },
   totalShown: { type: Number, default: 0 },
-  activeTitle: { type: String, default: '全部典藏' },
+  activeTitle: { type: String, default: '全部档案' },
 });
 
 const emit = defineEmits(['update:search', 'update:sort', 'update:viewMode', 'open-upload']);
@@ -20,7 +20,7 @@ const emit = defineEmits(['update:search', 'update:sort', 'update:viewMode', 'op
         <span class="count-pill">{{ totalShown }} 项</span>
       </div>
 
-      <!-- Recessed Search Well -->
+      <!-- Studio Search Well -->
       <div class="recessed-well search-well">
         <Search :size="15" class="search-icon" />
         <input
@@ -31,7 +31,7 @@ const emit = defineEmits(['update:search', 'update:sort', 'update:viewMode', 'op
           @input="emit('update:search', $event.target.value)"
         />
         <button v-if="search" class="clear-btn" title="清除搜索" @click="emit('update:search', '')">
-          <X :size="14" />
+          <X :size="13" />
         </button>
       </div>
     </div>
@@ -53,7 +53,7 @@ const emit = defineEmits(['update:search', 'update:sort', 'update:viewMode', 'op
         <button
           class="rocker-btn"
           :class="{ active: viewMode === 'grid' }"
-          title="卡片陈列视图"
+          title="公告板卡片视图"
           @click="emit('update:viewMode', 'grid')"
         >
           <LayoutGrid :size="14" />
@@ -68,8 +68,8 @@ const emit = defineEmits(['update:search', 'update:sort', 'update:viewMode', 'op
         </button>
       </div>
 
-      <!-- Brushed Brass Import Button -->
-      <button class="skeuo-btn skeuo-btn-brass import-btn" @click="emit('open-upload')">
+      <!-- Cobalt Primary Import Button -->
+      <button class="skeuo-btn skeuo-btn-primary import-btn" @click="emit('open-upload')">
         <Upload :size="15" />
         <span>导入档案</span>
       </button>
@@ -83,7 +83,7 @@ const emit = defineEmits(['update:search', 'update:sort', 'update:viewMode', 'op
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 14px 24px;
+  padding: 13px 26px;
   flex-wrap: wrap;
   z-index: 5;
 }
@@ -99,27 +99,28 @@ const emit = defineEmits(['update:search', 'update:sort', 'update:viewMode', 'op
 .title-block {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
   flex-shrink: 0;
 }
 
 .console-title {
   margin: 0;
-  font-family: var(--font-serif);
-  font-size: 18px;
+  font-family: var(--font-sans);
+  font-size: 17px;
   font-weight: 700;
-  color: #f4e6cf;
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.8);
+  color: var(--ink-primary);
+  letter-spacing: -0.01em;
 }
 
 .count-pill {
   font-family: var(--font-mono);
   font-size: 11px;
+  font-weight: 600;
   padding: 2px 8px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.42);
-  border: 1px solid rgba(255, 232, 198, 0.14);
-  color: #d7be96;
+  background: var(--surface-well);
+  border: 1px solid var(--border-mid);
+  color: var(--ink-secondary);
 }
 
 .search-well {
@@ -127,13 +128,13 @@ const emit = defineEmits(['update:search', 'update:sort', 'update:viewMode', 'op
   align-items: center;
   gap: 8px;
   padding: 0 12px;
-  height: 38px;
+  height: 36px;
   flex: 1;
   max-width: 440px;
 }
 
 .search-icon {
-  color: #9e8a74;
+  color: var(--ink-muted);
   flex-shrink: 0;
 }
 
@@ -142,12 +143,12 @@ const emit = defineEmits(['update:search', 'update:sort', 'update:viewMode', 'op
   border: none;
   outline: none;
   background: transparent;
-  color: #f4eadb;
+  color: var(--ink-primary);
   font-size: 13px;
 }
 
 .search-input::placeholder {
-  color: #7d6b59;
+  color: var(--ink-muted);
 }
 
 .clear-btn {
@@ -155,8 +156,8 @@ const emit = defineEmits(['update:search', 'update:sort', 'update:viewMode', 'op
   align-items: center;
   justify-content: center;
   border: none;
-  background: rgba(255, 255, 255, 0.08);
-  color: #ccb8a0;
+  background: rgba(15, 23, 42, 0.08);
+  color: var(--ink-secondary);
   border-radius: 50%;
   width: 20px;
   height: 20px;
@@ -164,7 +165,7 @@ const emit = defineEmits(['update:search', 'update:sort', 'update:viewMode', 'op
 }
 
 .clear-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(15, 23, 42, 0.16);
 }
 
 .console-right {
@@ -182,25 +183,26 @@ const emit = defineEmits(['update:search', 'update:sort', 'update:viewMode', 'op
 }
 
 .sort-icon {
-  color: #a9927a;
+  color: var(--ink-muted);
 }
 
 .sort-select {
   border: none;
   outline: none;
   background: transparent;
-  color: #ebd9c1;
+  color: var(--ink-primary);
   font-size: 12.5px;
+  font-weight: 500;
   cursor: pointer;
 }
 
 .sort-select option {
-  background: #231914;
-  color: #f3e8d8;
+  background: #ffffff;
+  color: var(--ink-primary);
 }
 
 .import-btn {
   height: 36px;
-  padding: 0 16px;
+  padding: 0 15px;
 }
 </style>
