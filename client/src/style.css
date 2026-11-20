@@ -1,14 +1,29 @@
 :root {
-  /* Modern Studio Bulletin Board Palette */
+  color-scheme: light;
+
+  /* Modern Studio Bulletin Board Palette (Light) */
   --board-bg: #eef1f6;
   --board-bg-deep: #e5e9f2;
+  --board-grad-start: #f3f5f9;
+  --board-grad-end: #e8ecf4;
   --board-dot: rgba(15, 23, 42, 0.12);
+
+  /* Rail & Console */
+  --rail-grad-start: #fafbfd;
+  --rail-grad-end: #f4f7fb;
+  --rail-shadow: 2px 0 14px rgba(15, 23, 42, 0.04);
+  --console-bg: rgba(255, 255, 255, 0.84);
+  --console-shadow: 0 2px 10px rgba(15, 23, 42, 0.035);
+  --backdrop-bg: rgba(15, 23, 42, 0.44);
 
   /* Surfaces & Paper */
   --surface-rail: #f8fafc;
   --surface-card: #ffffff;
+  --surface-elevated: #ffffff;
   --surface-subtle: #f3f6fa;
   --surface-well: #edf1f7;
+  --surface-input: #ffffff;
+  --surface-hover: #edf2f8;
   --border-light: #e2e8f0;
   --border-mid: #cfd8e6;
   --border-strong: #b6c3d6;
@@ -17,23 +32,49 @@
   --ink-primary: #111827;
   --ink-secondary: #475569;
   --ink-muted: #7b889c;
+  --ink-prose: #334155;
 
   /* Modern Studio Accents (Cobalt / Vermilion / Mint / Amber) */
   --accent-cobalt: #3b5bdb;
   --accent-cobalt-hover: #324ec4;
+  --accent-cobalt-text: #2b44b8;
   --accent-cobalt-soft: #edf2ff;
   --accent-cobalt-border: #bac8ff;
+  --accent-cobalt-ring: rgba(59, 91, 219, 0.13);
 
   --accent-vermilion: #e8590c;
+  --accent-vermilion-text: #d9480f;
   --accent-vermilion-soft: #fff4ed;
   --accent-vermilion-border: #ffc9a9;
 
   --accent-mint: #0ca678;
+  --accent-mint-text: #087f5b;
   --accent-mint-soft: #e6fcf5;
   --accent-mint-border: #96f2d7;
 
   --accent-amber: #f59f00;
   --accent-danger: #e03131;
+  --accent-danger-soft: #fff5f5;
+  --accent-danger-border: #ffc9c9;
+  --accent-danger-text: #c92a2a;
+
+  /* Tactile Controls (Light) */
+  --btn-bg-start: #ffffff;
+  --btn-bg-end: #f3f6fa;
+  --btn-bg-hover-start: #ffffff;
+  --btn-bg-hover-end: #eaf0f7;
+  --btn-inset: rgba(255, 255, 255, 0.9);
+  --btn-shadow-color: rgba(15, 23, 42, 0.06);
+
+  /* Hardware Card (Light) */
+  --hw-bg-start: #fafcff;
+  --hw-bg-end: #eef2f8;
+  --hw-border: #cbd5e1;
+  --hw-border-hover: #94a3b8;
+  --hw-inset: rgba(255, 255, 255, 0.95);
+  --hw-lip: #cbd5e1;
+  --hw-lip-hover: #b8c4d4;
+  --lcd-bezel-bottom: rgba(255, 255, 255, 0.8);
 
   /* Hardware Module & Dark Readout */
   --slate-dark: #141a24;
@@ -43,6 +84,10 @@
   --led-red: #f87171;
   --led-blue: #38bdf8;
 
+  /* Scrollbar */
+  --scrollbar-thumb: rgba(100, 116, 139, 0.3);
+  --scrollbar-thumb-hover: rgba(100, 116, 139, 0.5);
+
   /* Typography Stack */
   --font-serif: 'Noto Serif SC', Georgia, serif;
   --font-sans: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -51,6 +96,89 @@
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Modern Studio Bulletin Board Palette (Dark) */
+  --board-bg: #0f141e;
+  --board-bg-deep: #0b0f17;
+  --board-grad-start: #121824;
+  --board-grad-end: #0c1019;
+  --board-dot: rgba(148, 163, 184, 0.14);
+
+  /* Rail & Console */
+  --rail-grad-start: #141b27;
+  --rail-grad-end: #101621;
+  --rail-shadow: 2px 0 18px rgba(0, 0, 0, 0.35);
+  --console-bg: rgba(18, 24, 36, 0.84);
+  --console-shadow: 0 2px 14px rgba(0, 0, 0, 0.28);
+  --backdrop-bg: rgba(3, 7, 15, 0.68);
+
+  /* Surfaces & Paper */
+  --surface-rail: #131925;
+  --surface-card: #18202e;
+  --surface-elevated: #202a3c;
+  --surface-subtle: #141b27;
+  --surface-well: #101621;
+  --surface-input: #141b28;
+  --surface-hover: #212c3f;
+  --border-light: #243044;
+  --border-mid: #2f3e57;
+  --border-strong: #415474;
+
+  /* Typography */
+  --ink-primary: #eef2f8;
+  --ink-secondary: #a8b6cc;
+  --ink-muted: #7686a1;
+  --ink-prose: #cbd5e1;
+
+  /* Modern Studio Accents (Dark-tuned) */
+  --accent-cobalt: #5c7cfa;
+  --accent-cobalt-hover: #748ffc;
+  --accent-cobalt-text: #91a7ff;
+  --accent-cobalt-soft: rgba(92, 124, 250, 0.14);
+  --accent-cobalt-border: rgba(116, 143, 252, 0.34);
+  --accent-cobalt-ring: rgba(92, 124, 250, 0.26);
+
+  --accent-vermilion: #f76707;
+  --accent-vermilion-text: #ff925c;
+  --accent-vermilion-soft: rgba(247, 103, 7, 0.15);
+  --accent-vermilion-border: rgba(255, 146, 92, 0.34);
+
+  --accent-mint: #12b886;
+  --accent-mint-text: #63e6be;
+  --accent-mint-soft: rgba(18, 184, 134, 0.14);
+  --accent-mint-border: rgba(99, 230, 190, 0.32);
+
+  --accent-amber: #fab005;
+  --accent-danger: #f03e3e;
+  --accent-danger-soft: rgba(240, 62, 62, 0.14);
+  --accent-danger-border: rgba(250, 82, 82, 0.36);
+  --accent-danger-text: #ffa8a8;
+
+  /* Tactile Controls (Dark) */
+  --btn-bg-start: #222c3f;
+  --btn-bg-end: #192130;
+  --btn-bg-hover-start: #29354b;
+  --btn-bg-hover-end: #1f293b;
+  --btn-inset: rgba(255, 255, 255, 0.08);
+  --btn-shadow-color: rgba(0, 0, 0, 0.35);
+
+  /* Hardware Card (Dark Anodized) */
+  --hw-bg-start: #1d2536;
+  --hw-bg-end: #151c29;
+  --hw-border: #2f3e57;
+  --hw-border-hover: #475d80;
+  --hw-inset: rgba(255, 255, 255, 0.08);
+  --hw-lip: #0c1018;
+  --hw-lip-hover: #090d14;
+  --lcd-bezel-bottom: rgba(255, 255, 255, 0.08);
+
+  /* Scrollbar */
+  --scrollbar-thumb: rgba(148, 163, 184, 0.24);
+  --scrollbar-thumb-hover: rgba(148, 163, 184, 0.42);
 }
 
 * {
@@ -74,16 +202,16 @@ body,
   background-color: var(--board-bg);
   background-image:
     radial-gradient(var(--board-dot) 1.2px, transparent 1.2px),
-    linear-gradient(180deg, #f3f5f9 0%, #e8ecf4 100%);
+    linear-gradient(180deg, var(--board-grad-start) 0%, var(--board-grad-end) 100%);
   background-size: 22px 22px, 100% 100%;
 }
 
 /* Studio Left Index Rail */
 .rail-panel {
   position: relative;
-  background: linear-gradient(180deg, #fafbfd 0%, #f4f7fb 100%);
+  background: linear-gradient(180deg, var(--rail-grad-start) 0%, var(--rail-grad-end) 100%);
   border-right: 1px solid var(--border-light);
-  box-shadow: 2px 0 14px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--rail-shadow);
 }
 
 /* Architectural Studio Nameplate */
@@ -98,6 +226,13 @@ body,
     0 4px 12px rgba(15, 23, 42, 0.16);
 }
 
+:root[data-theme='dark'] .studio-plaque {
+  border-color: #2b3850;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
 .studio-pin-screw {
   width: 6px;
   height: 6px;
@@ -108,10 +243,10 @@ body,
 
 /* Top Frosted Studio Console */
 .console-bar {
-  background: rgba(255, 255, 255, 0.84);
+  background: var(--console-bg);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-light);
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.035);
+  box-shadow: var(--console-shadow);
 }
 
 /* Recessed Studio Input Well */
@@ -125,10 +260,10 @@ body,
 }
 
 .recessed-well:focus-within {
-  background: #ffffff;
+  background: var(--surface-input);
   border-color: var(--accent-cobalt);
   box-shadow:
-    0 0 0 3px rgba(59, 91, 219, 0.13),
+    0 0 0 3px var(--accent-cobalt-ring),
     inset 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
@@ -142,13 +277,13 @@ body,
   font-size: 13px;
   font-weight: 600;
   color: var(--ink-primary);
-  background: linear-gradient(180deg, #ffffff 0%, #f3f6fa 100%);
+  background: linear-gradient(180deg, var(--btn-bg-start) 0%, var(--btn-bg-end) 100%);
   border: 1px solid var(--border-mid);
   border-radius: 8px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 1px 0 var(--btn-inset),
     0 1px 0 var(--border-mid),
-    0 2px 4px rgba(15, 23, 42, 0.06);
+    0 2px 4px var(--btn-shadow-color);
   cursor: pointer;
   user-select: none;
   text-decoration: none;
@@ -156,15 +291,15 @@ body,
 }
 
 .skeuo-btn:hover:not(:disabled) {
-  background: linear-gradient(180deg, #ffffff 0%, #eaf0f7 100%);
+  background: linear-gradient(180deg, var(--btn-bg-hover-start) 0%, var(--btn-bg-hover-end) 100%);
   border-color: var(--border-strong);
 }
 
 .skeuo-btn:active:not(:disabled) {
   transform: translateY(1px);
   box-shadow:
-    inset 0 1px 3px rgba(15, 23, 42, 0.12),
-    0 1px 2px rgba(15, 23, 42, 0.04);
+    inset 0 1px 3px rgba(15, 23, 42, 0.16),
+    0 1px 2px var(--btn-shadow-color);
 }
 
 .skeuo-btn:disabled {
@@ -198,14 +333,14 @@ body,
 /* Secondary Paper / Soft Button */
 .skeuo-btn-paper {
   color: var(--ink-secondary);
-  background: #ffffff;
+  background: var(--surface-card);
   border: 1px solid var(--border-mid);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 1px 2px var(--btn-shadow-color);
 }
 
 .skeuo-btn-paper:hover:not(:disabled) {
   color: var(--ink-primary);
-  background: #f8fafc;
+  background: var(--surface-hover);
   border-color: var(--border-strong);
 }
 
@@ -231,7 +366,7 @@ body,
   border-radius: 9px;
   background: var(--surface-well);
   border: 1px solid var(--border-mid);
-  box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.06);
+  box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 
 .rocker-btn {
@@ -254,11 +389,11 @@ body,
 }
 
 .rocker-btn.active {
-  color: var(--accent-cobalt);
-  background: #ffffff;
+  color: var(--accent-cobalt-text);
+  background: var(--surface-elevated);
   box-shadow:
-    0 1px 3px rgba(15, 23, 42, 0.1),
-    0 0 0 1px rgba(15, 23, 42, 0.04);
+    0 1px 3px rgba(15, 23, 42, 0.12),
+    0 0 0 1px var(--border-light);
 }
 
 /* Pinned Paper Archival Card */
@@ -274,6 +409,12 @@ body,
   transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
+:root[data-theme='dark'] .paper-card {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.25),
+    0 8px 22px rgba(0, 0, 0, 0.3);
+}
+
 .paper-card:hover {
   transform: translateY(-4px);
   border-color: var(--border-strong);
@@ -282,27 +423,47 @@ body,
     0 14px 28px rgba(15, 23, 42, 0.11);
 }
 
+:root[data-theme='dark'] .paper-card:hover {
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.32),
+    0 16px 32px rgba(0, 0, 0, 0.45);
+}
+
 /* Modern Anodized Hardware Module Card (for Presets) */
 .hardware-card {
   position: relative;
   color: var(--ink-primary);
-  background: linear-gradient(180deg, #fafcff 0%, #eef2f8 100%);
-  border: 1px solid #cbd5e1;
+  background: linear-gradient(180deg, var(--hw-bg-start) 0%, var(--hw-bg-end) 100%);
+  border: 1px solid var(--hw-border);
   border-radius: 12px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    0 2px 0 #cbd5e1,
+    inset 0 1px 0 var(--hw-inset),
+    0 2px 0 var(--hw-lip),
     0 8px 18px rgba(15, 23, 42, 0.08);
   transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
+:root[data-theme='dark'] .hardware-card {
+  box-shadow:
+    inset 0 1px 0 var(--hw-inset),
+    0 2px 0 var(--hw-lip),
+    0 10px 24px rgba(0, 0, 0, 0.38);
+}
+
 .hardware-card:hover {
   transform: translateY(-4px);
-  border-color: #94a3b8;
+  border-color: var(--hw-border-hover);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 1),
-    0 3px 0 #b8c4d4,
+    inset 0 1px 0 var(--hw-inset),
+    0 3px 0 var(--hw-lip-hover),
     0 14px 28px rgba(15, 23, 42, 0.13);
+}
+
+:root[data-theme='dark'] .hardware-card:hover {
+  box-shadow:
+    inset 0 1px 0 var(--hw-inset),
+    0 3px 0 var(--hw-lip-hover),
+    0 16px 34px rgba(0, 0, 0, 0.5);
 }
 
 /* Bulletin Board Physical Accents: Push-Pin & Washi Tape */
@@ -354,6 +515,12 @@ body,
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 
+:root[data-theme='dark'] .washi-tape {
+  background: linear-gradient(90deg, rgba(92, 124, 250, 0.28) 0%, rgba(116, 143, 252, 0.38) 50%, rgba(92, 124, 250, 0.28) 100%);
+  border-top-color: rgba(255, 255, 255, 0.22);
+  border-bottom-color: rgba(92, 124, 250, 0.3);
+}
+
 /* Crisp OLED / LCD Readout Screen */
 .lcd-screen {
   background: linear-gradient(180deg, #121824 0%, #192233 100%);
@@ -361,7 +528,7 @@ body,
   border-radius: 8px;
   box-shadow:
     inset 0 2px 6px rgba(0, 0, 0, 0.65),
-    0 1px 0 rgba(255, 255, 255, 0.8);
+    0 1px 0 var(--lcd-bezel-bottom);
   font-family: var(--font-mono);
   color: #7dd3fc;
   text-shadow: 0 0 8px rgba(56, 189, 248, 0.25);
@@ -411,7 +578,7 @@ body,
 }
 
 .stamp-cobalt {
-  color: #2b44b8;
+  color: var(--accent-cobalt-text);
   background: var(--accent-cobalt-soft);
   border: 1px solid var(--accent-cobalt-border);
 }
@@ -424,7 +591,7 @@ body,
 }
 
 .stamp-mint {
-  color: #087f5b;
+  color: var(--accent-mint-text);
   background: var(--accent-mint-soft);
   border: 1px solid var(--accent-mint-border);
 }
@@ -446,10 +613,10 @@ body,
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.3);
+  background: var(--scrollbar-thumb);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.5);
+  background: var(--scrollbar-thumb-hover);
 }

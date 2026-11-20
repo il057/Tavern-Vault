@@ -100,7 +100,7 @@ onBeforeUnmount(() => {
 .app-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.48);
+  background: var(--backdrop-bg);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -114,9 +114,9 @@ onBeforeUnmount(() => {
   max-height: 90vh;
   padding: 20px 22px;
   border-radius: 14px;
-  background: #ffffff;
+  background: var(--surface-card);
   border: 1px solid var(--border-mid);
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
   display: flex;
   flex-direction: column;
   gap: 16px;

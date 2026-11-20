@@ -4,6 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tavern Vault · 酒馆档案墙</title>
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('tavern-vault-theme');
+          var mode = saved === 'light' || saved === 'dark' || saved === 'system' ? saved : 'system';
+          var dark =
+            mode === 'dark' ||
+            (mode === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var theme = dark ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', theme);
+          document.documentElement.style.colorScheme = theme;
+        } catch (e) {}
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

@@ -238,12 +238,12 @@ const navItems = [
 }
 
 .nav-tab:hover {
-  background: #edf2f8;
+  background: var(--surface-hover);
   color: var(--ink-primary);
 }
 
 .nav-tab.active {
-  color: var(--accent-cobalt);
+  color: var(--accent-cobalt-text);
   background: var(--accent-cobalt-soft);
   border-color: var(--accent-cobalt-border);
   font-weight: 600;
@@ -262,7 +262,7 @@ const navItems = [
 }
 
 .fav-tab.active {
-  color: #d9480f;
+  color: var(--accent-vermilion-text);
   background: var(--accent-vermilion-soft);
   border-color: var(--accent-vermilion-border);
 }
@@ -294,8 +294,8 @@ const navItems = [
   font-size: 11px;
   padding: 1px 7px;
   border-radius: 999px;
-  background: #eaf0f7;
-  border: 1px solid #dce4ef;
+  background: var(--surface-well);
+  border: 1px solid var(--border-light);
   color: var(--ink-secondary);
 }
 
@@ -329,7 +329,7 @@ const navItems = [
   padding: 4px 8px;
   font-size: 11.5px;
   color: var(--ink-secondary);
-  background: #ffffff;
+  background: var(--surface-card);
   border: 1px solid var(--border-mid);
   border-radius: 6px;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);

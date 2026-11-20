@@ -776,7 +776,7 @@ async function confirmDelete() {
 .drawer-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.42);
+  background: var(--backdrop-bg);
   backdrop-filter: blur(4px);
   display: flex;
   justify-content: flex-end;
@@ -788,9 +788,9 @@ async function confirmDelete() {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #ffffff;
+  background: var(--surface-card);
   border-left: 1px solid var(--border-mid);
-  box-shadow: -16px 0 48px rgba(15, 23, 42, 0.18);
+  box-shadow: -16px 0 48px rgba(15, 23, 42, 0.28);
 }
 
 .drawer-loading {
@@ -802,7 +802,7 @@ async function confirmDelete() {
 
 .drawer-header {
   padding: 18px 24px 14px;
-  background: #ffffff;
+  background: var(--surface-card);
   border-bottom: 1px solid var(--border-light);
   display: flex;
   align-items: flex-start;
@@ -850,7 +850,7 @@ async function confirmDelete() {
   display: flex;
   gap: 4px;
   padding: 10px 24px 0;
-  background: #f1f5f9;
+  background: var(--surface-well);
   border-bottom: 1px solid var(--border-mid);
   overflow-x: auto;
 }
@@ -871,12 +871,12 @@ async function confirmDelete() {
 
 .folio-tab:hover {
   color: var(--ink-primary);
-  background: rgba(255, 255, 255, 0.55);
+  background: var(--surface-hover);
 }
 
 .folio-tab.active {
-  color: var(--accent-cobalt);
-  background: #f8fafc;
+  color: var(--accent-cobalt-text);
+  background: var(--surface-subtle);
   border-color: var(--border-mid);
   margin-bottom: -1px;
   padding-bottom: 9px;
@@ -888,7 +888,7 @@ async function confirmDelete() {
   overflow-y: auto;
   padding: 22px 26px 36px;
   color: var(--ink-primary);
-  background: #f8fafc;
+  background: var(--surface-subtle);
 }
 
 .parchment-stack {
@@ -910,11 +910,11 @@ async function confirmDelete() {
   flex-shrink: 0;
   border-radius: 10px;
   overflow: hidden;
-  border: 3px solid #ffffff;
-  background: #e2e8f0;
+  border: 3px solid var(--surface-card);
+  background: var(--surface-well);
   box-shadow:
     0 0 0 1px var(--border-mid),
-    0 8px 20px rgba(15, 23, 42, 0.12);
+    0 8px 20px rgba(15, 23, 42, 0.16);
   cursor: pointer;
 }
 
@@ -973,14 +973,14 @@ async function confirmDelete() {
   border-radius: 8px;
   background: var(--accent-cobalt-soft);
   border: 1px solid var(--accent-cobalt-border);
-  color: #1e3a8a;
+  color: var(--accent-cobalt-text);
   font-size: 13px;
 }
 
 .parchment-block {
   padding: 15px 17px;
   border-radius: 10px;
-  background: #ffffff;
+  background: var(--surface-card);
   border: 1px solid var(--border-light);
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
@@ -1000,7 +1000,7 @@ async function confirmDelete() {
   font-family: var(--font-sans);
   font-size: 13.5px;
   line-height: 1.72;
-  color: #334155;
+  color: var(--ink-prose);
 }
 
 .greeting-pills {
@@ -1034,7 +1034,7 @@ async function confirmDelete() {
   padding: 0 12px;
   height: 38px;
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--surface-input);
   border: 1px solid var(--border-mid);
   box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05);
   color: var(--ink-muted);
@@ -1042,7 +1042,7 @@ async function confirmDelete() {
 
 .inline-search:focus-within {
   border-color: var(--accent-cobalt);
-  box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.12);
+  box-shadow: 0 0 0 3px var(--accent-cobalt-ring);
 }
 
 .inline-search input {
@@ -1075,7 +1075,7 @@ async function confirmDelete() {
 
 .entry-card {
   border-radius: 9px;
-  background: #ffffff;
+  background: var(--surface-card);
   border: 1px solid var(--border-light);
   overflow: hidden;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
@@ -1092,7 +1092,7 @@ async function confirmDelete() {
 }
 
 .entry-head:hover {
-  background: #f8fafc;
+  background: var(--surface-hover);
 }
 
 .entry-title-group {
@@ -1120,7 +1120,7 @@ async function confirmDelete() {
 .entry-body {
   padding: 12px 14px;
   border-top: 1px dashed var(--border-light);
-  background: #fafbfd;
+  background: var(--surface-subtle);
 }
 
 .regex-code {
@@ -1207,14 +1207,14 @@ async function confirmDelete() {
   padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid var(--border-light);
-  background: #f8fafc;
+  background: var(--surface-subtle);
   cursor: pointer;
   text-align: left;
   transition: all 0.12s ease;
 }
 
 .swatch-tile:hover {
-  background: #ffffff;
+  background: var(--surface-hover);
   border-color: var(--border-strong);
 }
 
@@ -1222,8 +1222,8 @@ async function confirmDelete() {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  border: 2px solid #fff;
-  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.12), 0 2px 5px rgba(15, 23, 42, 0.18);
+  border: 2px solid var(--surface-card);
+  box-shadow: 0 0 0 1px var(--border-mid), 0 2px 5px rgba(15, 23, 42, 0.18);
   flex-shrink: 0;
 }
 
@@ -1302,7 +1302,7 @@ async function confirmDelete() {
   padding: 9px 11px;
   border-radius: 8px;
   border: 1px solid var(--border-mid);
-  background: #ffffff;
+  background: var(--surface-input);
   color: var(--ink-primary);
   font-family: inherit;
   font-size: 13.5px;
@@ -1311,8 +1311,13 @@ async function confirmDelete() {
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+.paper-input option {
+  background: var(--surface-card);
+  color: var(--ink-primary);
+}
+
 .paper-input:focus {
   border-color: var(--accent-cobalt);
-  box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.13);
+  box-shadow: 0 0 0 3px var(--accent-cobalt-ring);
 }
 </style>

@@ -341,7 +341,7 @@ const formatNum = (n) => {
   margin: 10px 10px 0;
   border-radius: 8px;
   overflow: hidden;
-  background: linear-gradient(180deg, #e8edf5 0%, #dce3ee 100%);
+  background: var(--surface-well);
   border: 1px solid var(--border-light);
   box-shadow: inset 0 1px 4px rgba(15, 23, 42, 0.08);
 }
@@ -419,14 +419,14 @@ const formatNum = (n) => {
 }
 
 .glass-btn.light-action {
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--surface-card);
   color: var(--ink-secondary);
-  border-color: rgba(15, 23, 42, 0.1);
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+  border-color: var(--border-mid);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.1);
 }
 
 .glass-btn.light-action:hover {
-  background: #ffffff;
+  background: var(--surface-elevated);
   color: var(--ink-primary);
 }
 
@@ -452,15 +452,15 @@ const formatNum = (n) => {
 }
 
 .banner-worldbook {
-  color: #087f5b;
-  background: linear-gradient(135deg, #e6fcf5 0%, #d3f9ec 100%);
-  border-color: #96f2d7;
+  color: var(--accent-mint-text);
+  background: var(--accent-mint-soft);
+  border-color: var(--accent-mint-border);
 }
 
 .banner-other {
-  color: #3b5bdb;
-  background: linear-gradient(135deg, #edf2ff 0%, #dbe4ff 100%);
-  border-color: #bac8ff;
+  color: var(--accent-cobalt-text);
+  background: var(--accent-cobalt-soft);
+  border-color: var(--accent-cobalt-border);
 }
 
 /* Card Body */
@@ -581,11 +581,11 @@ const formatNum = (n) => {
   height: 27px;
   border-radius: 7px;
   border: 1px solid var(--border-mid);
-  background: #ffffff;
+  background: var(--surface-card);
   color: var(--ink-secondary);
   cursor: pointer;
   text-decoration: none;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 1px 2px var(--btn-shadow-color);
   transition: all 0.12s ease;
 }
 
@@ -643,7 +643,7 @@ const formatNum = (n) => {
 }
 
 .hw-footer {
-  border-top: 1px dashed #cbd5e1;
+  border-top: 1px dashed var(--border-mid);
 }
 
 .tag-row {
@@ -656,7 +656,7 @@ const formatNum = (n) => {
   font-size: 10.5px;
   padding: 2px 7px;
   border-radius: 5px;
-  background: #ffffff;
+  background: var(--surface-card);
   border: 1px solid var(--border-mid);
   color: var(--ink-secondary);
 }
@@ -697,9 +697,9 @@ const formatNum = (n) => {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 2px solid #ffffff;
+  border: 2px solid var(--surface-card);
   box-shadow:
-    0 0 0 1px rgba(15, 23, 42, 0.12),
+    0 0 0 1px var(--border-mid),
     0 2px 4px rgba(15, 23, 42, 0.16);
 }
 

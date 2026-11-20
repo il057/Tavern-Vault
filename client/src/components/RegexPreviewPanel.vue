@@ -524,7 +524,7 @@ const renderedMap = computed(() => {
 
 .regex-card {
   border-radius: 10px;
-  background: #ffffff;
+  background: var(--surface-card);
   border: 1px solid var(--border-light);
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
   overflow: hidden;
@@ -538,12 +538,12 @@ const renderedMap = computed(() => {
   gap: 10px;
   cursor: pointer;
   flex-wrap: wrap;
-  background: #fafbfd;
+  background: var(--surface-subtle);
   border-bottom: 1px solid var(--border-light);
 }
 
 .regex-head:hover {
-  background: #f3f6fb;
+  background: var(--surface-hover);
 }
 
 .regex-head-left {
@@ -596,7 +596,7 @@ const renderedMap = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  background: #ffffff;
+  background: var(--surface-card);
 }
 
 .stage-meta {
@@ -612,7 +612,7 @@ const renderedMap = computed(() => {
 }
 
 .meta-pill.ok {
-  color: #087f5b;
+  color: var(--accent-mint-text);
   font-weight: 600;
 }
 
@@ -695,7 +695,7 @@ const renderedMap = computed(() => {
   padding: 9px 11px;
   border-radius: 8px;
   border: 1px solid var(--border-mid);
-  background: #fafbfd;
+  background: var(--surface-well);
   color: var(--ink-primary);
   font-family: var(--font-mono);
   font-size: 12px;
@@ -705,16 +705,16 @@ const renderedMap = computed(() => {
 }
 
 .test-textarea:focus {
-  background: #ffffff;
+  background: var(--surface-input);
   border-color: var(--accent-cobalt);
-  box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.12);
+  box-shadow: 0 0 0 3px var(--accent-cobalt-ring);
 }
 
 .miss-tip {
   font-size: 12px;
-  color: #c92a2a;
-  background: #fff5f5;
-  border: 1px solid #ffc9c9;
+  color: var(--accent-danger-text);
+  background: var(--accent-danger-soft);
+  border: 1px solid var(--accent-danger-border);
   padding: 7px 10px;
   border-radius: 7px;
   word-break: break-all;

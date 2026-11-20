@@ -1,5 +1,6 @@
 <script setup>
-import { Search, X, Upload, LayoutGrid, List, ArrowUpDown } from 'lucide-vue-next';
+import { Search, X, Upload, LayoutGrid, List, ArrowUpDown, Sun, Moon, Monitor } from 'lucide-vue-next';
+import { useTheme } from '../composables/useTheme.js';
 
 defineProps({
   search: { type: String, default: '' },
@@ -10,6 +11,8 @@ defineProps({
 });
 
 const emit = defineEmits(['update:search', 'update:sort', 'update:viewMode', 'open-upload']);
+
+const { themeMode, setThemeMode } = useTheme();
 </script>
 
 <template>
@@ -46,6 +49,34 @@ const emit = defineEmits(['update:search', 'update:sort', 'update:viewMode', 'op
           <option value="name_asc">名称 A-Z</option>
           <option value="size_desc">体积从大到小</option>
         </select>
+      </div>
+
+      <!-- Theme Mode Rocker Switch (System / Light / Dark) -->
+      <div class="rocker-group theme-rocker" role="group" aria-label="日夜模式切换">
+        <button
+          class="rocker-btn"
+          :class="{ active: themeMode === 'system' }"
+          title="跟随系统日夜模式"
+          @click="setThemeMode('system')"
+        >
+          <Monitor :size="14" />
+        </button>
+        <button
+          class="rocker-btn"
+          :class="{ active: themeMode === 'light' }"
+          title="浅色模式"
+          @click="setThemeMode('light')"
+        >
+          <Sun :size="14" />
+        </button>
+        <button
+          class="rocker-btn"
+          :class="{ active: themeMode === 'dark' }"
+          title="深色模式"
+          @click="setThemeMode('dark')"
+        >
+          <Moon :size="14" />
+        </button>
       </div>
 
       <!-- View Rocker Switch -->
@@ -156,7 +187,7 @@ const emit = defineEmits(['update:search', 'update:sort', 'update:viewMode', 'op
   align-items: center;
   justify-content: center;
   border: none;
-  background: rgba(15, 23, 42, 0.08);
+  background: var(--surface-hover);
   color: var(--ink-secondary);
   border-radius: 50%;
   width: 20px;
@@ -165,13 +196,19 @@ const emit = defineEmits(['update:search', 'update:sort', 'update:viewMode', 'op
 }
 
 .clear-btn:hover {
-  background: rgba(15, 23, 42, 0.16);
+  background: var(--border-mid);
+  color: var(--ink-primary);
 }
 
 .console-right {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
+}
+
+.theme-rocker .rocker-btn {
+  padding: 5px 8px;
 }
 
 .sort-well {
@@ -197,7 +234,7 @@ const emit = defineEmits(['update:search', 'update:sort', 'update:viewMode', 'op
 }
 
 .sort-select option {
-  background: #ffffff;
+  background: var(--surface-card);
   color: var(--ink-primary);
 }
 

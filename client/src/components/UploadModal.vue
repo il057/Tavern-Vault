@@ -173,10 +173,10 @@ async function submitUpload() {
   text-align: center;
   cursor: pointer;
   background:
-    radial-gradient(rgba(59, 91, 219, 0.1) 1px, transparent 1px),
-    #f6f8ff;
+    radial-gradient(var(--accent-cobalt-border) 1px, transparent 1px),
+    var(--surface-subtle);
   background-size: 18px 18px;
-  border: 2px dashed #93b4f8;
+  border: 2px dashed var(--accent-cobalt-border);
   transition: all 0.16s ease;
 }
 
@@ -184,8 +184,8 @@ async function submitUpload() {
 .drop-tray.dragging {
   border-color: var(--accent-cobalt);
   background:
-    radial-gradient(rgba(59, 91, 219, 0.14) 1px, transparent 1px),
-    #edf2ff;
+    radial-gradient(var(--accent-cobalt-border) 1px, transparent 1px),
+    var(--accent-cobalt-soft);
 }
 
 .tray-icon {
@@ -221,7 +221,7 @@ async function submitUpload() {
   gap: 10px;
   padding: 6px 9px;
   border-radius: 7px;
-  background: #ffffff;
+  background: var(--surface-card);
   border: 1px solid var(--border-light);
   font-size: 12.5px;
 }
@@ -291,7 +291,7 @@ async function submitUpload() {
 }
 
 .field-input option {
-  background: #ffffff;
+  background: var(--surface-card);
   color: var(--ink-primary);
 }
 
@@ -301,9 +301,9 @@ async function submitUpload() {
   gap: 8px;
   padding: 9px 12px;
   border-radius: 8px;
-  background: #fff5f5;
-  border: 1px solid #ffc9c9;
-  color: #c92a2a;
+  background: var(--accent-danger-soft);
+  border: 1px solid var(--accent-danger-border);
+  color: var(--accent-danger-text);
   font-size: 12.5px;
 }
 </style>
