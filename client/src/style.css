@@ -1,0 +1,425 @@
+:root {
+  /* Wood & Leather Palette */
+  --wood-deep: #1a120d;
+  --wood-mid: #271b14;
+  --wood-warm: #35251c;
+  --leather-dark: #251b16;
+  --leather-mid: #32241d;
+  --leather-stitch: rgba(212, 169, 106, 0.36);
+
+  /* Parchment & Linen Paper */
+  --paper-light: #f6efe2;
+  --paper-mid: #ebe0cc;
+  --paper-deep: #d9c8ac;
+  --paper-ink: #2b2118;
+  --paper-ink-muted: #6c5b4a;
+
+  /* Brushed Brass & Warm Metal */
+  --brass-light: #f2d59b;
+  --brass-mid: #c99a4e;
+  --brass-dark: #875f24;
+  --metal-dark: #2c2825;
+  --metal-mid: #433c37;
+  --metal-light: #5c524a;
+
+  /* Accents & LEDs */
+  --wax-red: #9e2a2b;
+  --wax-red-hi: #c84648;
+  --led-green: #4ade80;
+  --led-amber: #fbbf24;
+  --led-red: #f87171;
+  --led-blue: #60a5fa;
+
+  --font-serif: 'Noto Serif SC', Georgia, serif;
+  --font-sans: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', Consolas, monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: var(--font-sans);
+  color: #efe5d5;
+  background-color: var(--wood-deep);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle organic grain overlay via inline SVG noise */
+.wood-desk {
+  background-color: #1f1610;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(201, 154, 78, 0.08), transparent 55%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.012) 0px,
+      rgba(255, 255, 255, 0.012) 2px,
+      rgba(0, 0, 0, 0.03) 2px,
+      rgba(0, 0, 0, 0.03) 7px
+    ),
+    linear-gradient(180deg, #281c15 0%, #1c130e 100%);
+}
+
+/* Stitched Leather Sidebar Panel */
+.leather-panel {
+  position: relative;
+  background:
+    radial-gradient(circle at 30% 10%, rgba(255, 224, 178, 0.05), transparent 50%),
+    linear-gradient(180deg, #2f221b 0%, #231914 55%, #1d1410 100%);
+  box-shadow:
+    inset -1px 0 0 rgba(255, 232, 195, 0.08),
+    inset 0 1px 0 rgba(255, 232, 195, 0.08),
+    4px 0 18px rgba(0, 0, 0, 0.55);
+  border-right: 2px solid #120c09;
+}
+
+.leather-panel::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 1.5px dashed var(--leather-stitch);
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+/* Brushed Brass Nameplate */
+.brass-plate {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    #e8cb8e 0%,
+    #c6964a 28%,
+    #f0d79f 50%,
+    #a8772e 78%,
+    #cfa158 100%
+  );
+  color: #2b1a07;
+  border: 1px solid #6b4917;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 250, 230, 0.85),
+    inset 0 -2px 3px rgba(90, 56, 12, 0.55),
+    0 4px 10px rgba(0, 0, 0, 0.55);
+  text-shadow: 0 1px 0 rgba(255, 240, 200, 0.65);
+}
+
+.brass-rivet {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff4d2 0%, #c6964a 45%, #5b3c10 100%);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.65),
+    inset 0 0.5px 0.5px rgba(255, 255, 255, 0.7);
+}
+
+/* Top Beveled Console */
+.console-bar {
+  background: linear-gradient(180deg, #3c2f27 0%, #2c221c 48%, #241b16 100%);
+  border-bottom: 2px solid #120c09;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 234, 200, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55),
+    0 5px 16px rgba(0, 0, 0, 0.45);
+}
+
+/* Recessed Glass / Bakelite Input Well */
+.recessed-well {
+  background: linear-gradient(180deg, #16100d 0%, #211814 100%);
+  border: 1px solid #100b09;
+  border-radius: 9px;
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.78),
+    inset 0 1px 2px rgba(0, 0, 0, 0.9),
+    0 1px 0 rgba(255, 232, 198, 0.14);
+  color: #f3e8d8;
+}
+
+.recessed-well:focus-within {
+  border-color: rgba(217, 169, 91, 0.65);
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.8),
+    0 0 0 2px rgba(217, 169, 91, 0.22),
+    0 1px 0 rgba(255, 232, 198, 0.18);
+}
+
+/* Physical 3D Tactile Push Buttons */
+.skeuo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #f4eadb;
+  background: linear-gradient(180deg, #52443a 0%, #3b3029 52%, #2f2520 100%);
+  border: 1px solid #17110d;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 215, 0.24),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45),
+    0 3px 0 #16100c,
+    0 4px 8px rgba(0, 0, 0, 0.45);
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.65);
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.15s ease;
+}
+
+.skeuo-btn:hover:not(:disabled) {
+  filter: brightness(1.09);
+}
+
+.skeuo-btn:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.55),
+    0 1px 0 #16100c,
+    0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.skeuo-btn:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.skeuo-btn-brass {
+  color: #2c1a05;
+  background: linear-gradient(180deg, #f3d79e 0%, #d4a354 52%, #b48133 100%);
+  border: 1px solid #634212;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 232, 0.85),
+    inset 0 -1px 0 rgba(105, 65, 14, 0.5),
+    0 3px 0 #5b3a0f,
+    0 5px 12px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 0 rgba(255, 242, 205, 0.65);
+}
+
+.skeuo-btn-brass:active:not(:disabled) {
+  box-shadow:
+    inset 0 2px 4px rgba(90, 52, 8, 0.5),
+    0 1px 0 #5b3a0f,
+    0 2px 4px rgba(0, 0, 0, 0.45);
+}
+
+.skeuo-btn-paper {
+  color: var(--paper-ink);
+  background: linear-gradient(180deg, #fbf6ec 0%, #e7dac3 55%, #d9c8ab 100%);
+  border: 1px solid #9c8668;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(130, 105, 72, 0.35),
+    0 2px 0 #8a7355,
+    0 3px 6px rgba(40, 28, 16, 0.22);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.skeuo-btn-paper:active:not(:disabled) {
+  box-shadow:
+    inset 0 2px 4px rgba(80, 60, 35, 0.35),
+    0 1px 0 #8a7355;
+}
+
+.skeuo-btn-danger {
+  color: #fff3f3;
+  background: linear-gradient(180deg, #c24244 0%, #962729 55%, #7a1c1e 100%);
+  border: 1px solid #471011;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 210, 210, 0.38),
+    0 3px 0 #420f10,
+    0 4px 8px rgba(0, 0, 0, 0.45);
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.55);
+}
+
+/* Segmented Rocker Switch */
+.rocker-group {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 9px;
+  background: #16100c;
+  border: 1px solid #0e0a07;
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, 0.8),
+    0 1px 0 rgba(255, 232, 198, 0.14);
+}
+
+.rocker-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #a69583;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.rocker-btn.active {
+  color: #2b1a06;
+  background: linear-gradient(180deg, #ecd096 0%, #c8984c 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 230, 0.8),
+    0 1px 4px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 0 rgba(255, 240, 200, 0.55);
+}
+
+/* Linen / Parchment Archival Card */
+.paper-card {
+  position: relative;
+  color: var(--paper-ink);
+  background:
+    radial-gradient(circle at 15% 10%, rgba(255, 255, 255, 0.55), transparent 55%),
+    linear-gradient(180deg, #f7f0e3 0%, #ece0cb 100%);
+  border: 1px solid #b59e7d;
+  border-radius: 11px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(138, 112, 76, 0.35),
+    0 2px 0 #9f8764,
+    0 8px 20px rgba(0, 0, 0, 0.45);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.paper-card:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(138, 112, 76, 0.4),
+    0 4px 0 #9f8764,
+    0 14px 28px rgba(0, 0, 0, 0.55);
+}
+
+/* Analog Hardware Module Card (for Presets) */
+.hardware-card {
+  position: relative;
+  color: #efe5d5;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 235, 200, 0.07), transparent 60%),
+    linear-gradient(180deg, #3a332e 0%, #2a2420 60%, #211c19 100%);
+  border: 1px solid #594e45;
+  border-radius: 11px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 220, 0.2),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.55),
+    0 3px 0 #130f0d,
+    0 8px 20px rgba(0, 0, 0, 0.52);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.hardware-card:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 220, 0.28),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.55),
+    0 5px 0 #130f0d,
+    0 14px 28px rgba(0, 0, 0, 0.6);
+}
+
+/* Recessed LCD Readout */
+.lcd-screen {
+  background: linear-gradient(180deg, #101613 0%, #17211c 100%);
+  border: 1px solid #090d0b;
+  border-radius: 7px;
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.85),
+    0 1px 0 rgba(255, 255, 255, 0.1);
+  font-family: var(--font-mono);
+  color: #9be8b8;
+  text-shadow: 0 0 8px rgba(74, 222, 128, 0.35);
+}
+
+/* Glowing Physical LED */
+.led-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.65);
+}
+
+.led-green {
+  background: radial-gradient(circle at 35% 30%, #bbf7d0 0%, #22c55e 60%, #14532d 100%);
+  box-shadow: 0 0 7px rgba(74, 222, 128, 0.75), inset 0 1px 1px rgba(255, 255, 255, 0.7);
+}
+
+.led-amber {
+  background: radial-gradient(circle at 35% 30%, #fef08a 0%, #f59e0b 60%, #78350f 100%);
+  box-shadow: 0 0 7px rgba(251, 191, 36, 0.75), inset 0 1px 1px rgba(255, 255, 255, 0.7);
+}
+
+.led-off {
+  background: radial-gradient(circle at 35% 30%, #57534e 0%, #292524 70%, #1c1917 100%);
+}
+
+/* Wax Seal / Embossed Stamp */
+.stamp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  letter-spacing: 0.03em;
+}
+
+.stamp-wax {
+  color: #fff4ec;
+  background: linear-gradient(180deg, #b83b3d 0%, #8a2022 100%);
+  border: 1px solid #591112;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 210, 210, 0.45),
+    0 2px 4px rgba(0, 0, 0, 0.35);
+}
+
+.stamp-brass {
+  color: #2f1d06;
+  background: linear-gradient(180deg, #f2d599 0%, #c89648 100%);
+  border: 1px solid #7d561d;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 230, 0.8),
+    0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.stamp-ink {
+  color: #554332;
+  background: rgba(130, 102, 68, 0.14);
+  border: 1px solid rgba(130, 102, 68, 0.35);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.08);
+}
+
+/* Custom Tactile Scrollbars */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(14, 10, 8, 0.45);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #635143 0%, #44362c 100%);
+  border: 1px solid #1b130e;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #7a6352 0%, #584639 100%);
+}

@@ -1,0 +1,11 @@
+services:
+  tavern-vault:
+    build: .
+    container_name: tavern-vault
+    restart: unless-stopped
+    ports:
+      - "3456:3456"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - PORT=3456
