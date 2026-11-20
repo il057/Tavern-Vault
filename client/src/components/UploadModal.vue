@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { UploadCloud, X, FileText, Image as ImageIcon, CheckCircle2, AlertCircle } from 'lucide-vue-next';
 import { uploadFiles, formatBytes } from '../api/vault.js';
+import AppModal from './AppModal.vue';
 
 defineProps({
   open: { type: Boolean, default: false },
@@ -65,162 +66,106 @@ async function submitUpload() {
 </script>
 
 <template>
-  <Teleport to="body">
-    <div v-if="open" class="modal-backdrop" @click.self="emit('close')">
-      <div class="upload-folio">
-        <div class="folio-header">
-          <div>
-            <h2 class="folio-title">导入 SillyTavern 档案</h2>
-            <p class="folio-sub">支持角色卡（.png / .json）、对话预设、界面主题、世界书及正则脚本</p>
-          </div>
-          <button class="skeuo-btn close-btn" @click="emit('close')">
-            <X :size="16" />
-          </button>
+  <AppModal
+    :open="open"
+    title="导入 SillyTavern 档案"
+    subtitle="支持角色卡（.png / .json）、对话预设、界面主题、世界书及正则脚本"
+    max-width="600px"
+    :loading="uploading"
+    @close="emit('close')"
+  >
+    <!-- Studio Pinboard Drop Zone -->
+    <div
+      class="drop-tray"
+      :class="{ dragging: isDragging }"
+      @dragover.prevent="isDragging = true"
+      @dragleave.prevent="isDragging = false"
+      @drop.prevent="onDrop"
+      @click="fileInput?.click()"
+    >
+      <input
+        ref="fileInput"
+        type="file"
+        multiple
+        accept=".json,.png"
+        style="display: none"
+        @change="addFiles($event.target.files); $event.target.value = ''"
+      />
+      <UploadCloud :size="36" class="tray-icon" />
+      <div class="tray-title">拖拽文件至此区域，或点击选择文件</div>
+      <div class="tray-hint">支持批量导入 · 单文件最大 100 MB · 自动识别角色卡 / 预设 / 主题 / 世界书</div>
+    </div>
+
+    <!-- Queued Files -->
+    <div v-if="queuedFiles.length" class="queue-list recessed-well">
+      <div v-for="(f, idx) in queuedFiles" :key="`${f.name}-${idx}`" class="queue-item">
+        <div class="q-left">
+          <ImageIcon v-if="f.name.toLowerCase().endsWith('.png')" :size="15" class="q-icon" />
+          <FileText v-else :size="15" class="q-icon" />
+          <span class="q-name">{{ f.name }}</span>
+          <span class="q-size">{{ formatBytes(f.size) }}</span>
         </div>
-
-        <!-- Studio Pinboard Drop Zone -->
-        <div
-          class="drop-tray"
-          :class="{ dragging: isDragging }"
-          @dragover.prevent="isDragging = true"
-          @dragleave.prevent="isDragging = false"
-          @drop.prevent="onDrop"
-          @click="fileInput?.click()"
-        >
-          <input
-            ref="fileInput"
-            type="file"
-            multiple
-            accept=".json,.png"
-            style="display: none"
-            @change="addFiles($event.target.files); $event.target.value = ''"
-          />
-          <UploadCloud :size="36" class="tray-icon" />
-          <div class="tray-title">拖拽文件至此区域，或点击选择文件</div>
-          <div class="tray-hint">支持批量导入 · 单文件最大 100 MB · 自动识别角色卡 / 预设 / 主题 / 世界书</div>
-        </div>
-
-        <!-- Queued Files -->
-        <div v-if="queuedFiles.length" class="queue-list recessed-well">
-          <div v-for="(f, idx) in queuedFiles" :key="`${f.name}-${idx}`" class="queue-item">
-            <div class="q-left">
-              <ImageIcon v-if="f.name.toLowerCase().endsWith('.png')" :size="15" class="q-icon" />
-              <FileText v-else :size="15" class="q-icon" />
-              <span class="q-name">{{ f.name }}</span>
-              <span class="q-size">{{ formatBytes(f.size) }}</span>
-            </div>
-            <button class="q-remove" @click="removeFile(idx)">
-              <X :size="13" />
-            </button>
-          </div>
-        </div>
-
-        <!-- Metadata Options -->
-        <div class="options-grid">
-          <label class="field-box">
-            <span>归档分类</span>
-            <select v-model="category" class="recessed-well field-input">
-              <option value="auto">智能自动识别（推荐）</option>
-              <option value="character">角色卡 (Character Card)</option>
-              <option value="preset">对话预设 (Preset)</option>
-              <option value="theme">界面主题 (Theme)</option>
-              <option value="worldbook">世界书 (World Info)</option>
-              <option value="other">正则与扩展 (Other)</option>
-            </select>
-          </label>
-
-          <label class="field-box">
-            <span>归入分组（可选）</span>
-            <input
-              v-model="folder"
-              type="text"
-              placeholder="例如：古风大世界 / Claude 常用"
-              class="recessed-well field-input"
-            />
-          </label>
-
-          <label class="field-box full-span">
-            <span>附加标签（逗号分隔，可选）</span>
-            <input
-              v-model="tags"
-              type="text"
-              placeholder="例如：V3, 长篇, 暗黑主题"
-              class="recessed-well field-input"
-            />
-          </label>
-        </div>
-
-        <div v-if="errorMsg" class="error-bar">
-          <AlertCircle :size="15" />
-          <span>{{ errorMsg }}</span>
-        </div>
-
-        <div class="folio-actions">
-          <button class="skeuo-btn" @click="emit('close')">取消</button>
-          <button
-            class="skeuo-btn skeuo-btn-primary"
-            :disabled="queuedFiles.length === 0 || uploading"
-            @click="submitUpload"
-          >
-            <CheckCircle2 :size="15" />
-            <span>{{ uploading ? '正在解析归档…' : `确认贴入 (${queuedFiles.length})` }}</span>
-          </button>
-        </div>
+        <button class="q-remove" @click="removeFile(idx)">
+          <X :size="13" />
+        </button>
       </div>
     </div>
-  </Teleport>
+
+    <!-- Metadata Options -->
+    <div class="options-grid">
+      <label class="field-box">
+        <span>归档分类</span>
+        <select v-model="category" class="recessed-well field-input">
+          <option value="auto">智能自动识别（推荐）</option>
+          <option value="character">角色卡 (Character Card)</option>
+          <option value="preset">对话预设 (Preset)</option>
+          <option value="theme">界面主题 (Theme)</option>
+          <option value="worldbook">世界书 (World Info)</option>
+          <option value="other">正则与扩展 (Other)</option>
+        </select>
+      </label>
+
+      <label class="field-box">
+        <span>归入分组（可选）</span>
+        <input
+          v-model="folder"
+          type="text"
+          placeholder="例如：古风大世界 / Claude 常用"
+          class="recessed-well field-input"
+        />
+      </label>
+
+      <label class="field-box full-span">
+        <span>附加标签（逗号分隔，可选）</span>
+        <input
+          v-model="tags"
+          type="text"
+          placeholder="例如：V3, 长篇, 暗黑主题"
+          class="recessed-well field-input"
+        />
+      </label>
+    </div>
+
+    <div v-if="errorMsg" class="error-bar">
+      <AlertCircle :size="15" />
+      <span>{{ errorMsg }}</span>
+    </div>
+
+    <template #footer>
+      <button class="skeuo-btn" :disabled="uploading" @click="emit('close')">取消</button>
+      <button
+        class="skeuo-btn skeuo-btn-primary"
+        :disabled="queuedFiles.length === 0 || uploading"
+        @click="submitUpload"
+      >
+        <CheckCircle2 :size="15" />
+        <span>{{ uploading ? '正在解析归档…' : `确认贴入 (${queuedFiles.length})` }}</span>
+      </button>
+    </template>
+  </AppModal>
 </template>
 
 <style scoped>
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.45);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  z-index: 100;
-}
-
-.upload-folio {
-  width: 100%;
-  max-width: 600px;
-  padding: 22px 24px;
-  border-radius: 14px;
-  background: #ffffff;
-  border: 1px solid var(--border-mid);
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.folio-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.folio-title {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--ink-primary);
-}
-
-.folio-sub {
-  margin: 4px 0 0;
-  font-size: 12.5px;
-  color: var(--ink-secondary);
-}
-
-.close-btn {
-  padding: 6px;
-}
-
 /* Blueprint Studio Drop Tray */
 .drop-tray {
   padding: 28px 20px;
@@ -360,12 +305,5 @@ async function submitUpload() {
   border: 1px solid #ffc9c9;
   color: #c92a2a;
   font-size: 12.5px;
-}
-
-.folio-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding-top: 6px;
 }
 </style>

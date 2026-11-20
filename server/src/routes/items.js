@@ -192,6 +192,21 @@ function buildDetailPayload(row, json) {
     };
   }
 
+  // Standalone regex script (single object or array of regex scripts)
+  if (json.findRegex !== undefined || (Array.isArray(json) && json[0]?.findRegex !== undefined)) {
+    const arr = Array.isArray(json) ? json : [json];
+    return {
+      subtype: 'regex',
+      regex_scripts: arr.map((r, i) => ({
+        id: r.id || i,
+        scriptName: r.scriptName || row.name || `Regex #${i + 1}`,
+        findRegex: r.findRegex || '',
+        replaceString: r.replaceString || '',
+        disabled: Boolean(r.disabled),
+      })),
+    };
+  }
+
   return json;
 }
 

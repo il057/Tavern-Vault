@@ -24,6 +24,8 @@ import {
   getExportPngUrl,
   formatBytes,
 } from '../api/vault.js';
+import AppModal from './AppModal.vue';
+import RegexPreviewPanel from './RegexPreviewPanel.vue';
 
 const props = defineProps({
   itemId: { type: String, default: null },
@@ -63,6 +65,8 @@ const editForm = ref({
 });
 const savingEdit = ref(false);
 const coverInput = ref(null);
+const deleteModalOpen = ref(false);
+const deleting = ref(false);
 
 watch(
   () => props.itemId,
@@ -289,15 +293,34 @@ async function onCoverSelected(e) {
   }
 }
 
-async function handleDelete() {
+const regexSampleTexts = computed(() => {
+  if (!detail.value) return [];
+  const arr = [];
+  if (detail.value.first_mes) arr.push(detail.value.first_mes);
+  if (Array.isArray(detail.value.alternate_greetings)) {
+    arr.push(...detail.value.alternate_greetings);
+  }
+  if (detail.value.mes_example) arr.push(detail.value.mes_example);
+  return arr;
+});
+
+function handleDelete() {
   if (!item.value) return;
-  if (!window.confirm(`确定要从本地仓库永久删除「${item.value.name}」吗？此操作不可恢复。`)) return;
+  deleteModalOpen.value = true;
+}
+
+async function confirmDelete() {
+  if (!item.value || deleting.value) return;
+  deleting.value = true;
   try {
     await deleteItem(item.value.id);
+    deleteModalOpen.value = false;
     emit('deleted', item.value.id);
     emit('close');
   } catch (err) {
     emit('notify', { type: 'error', text: err.message });
+  } finally {
+    deleting.value = false;
   }
 }
 </script>
@@ -490,25 +513,17 @@ async function handleDelete() {
 
             <!-- CHARACTER: EXTENSIONS -->
             <div v-else-if="item.category === 'character' && activeTab === 'extensions'" class="parchment-stack">
-              <div class="parchment-block">
+              <div v-if="detail?.regex_scripts?.length" class="parchment-block">
+                <RegexPreviewPanel
+                  :scripts="detail.regex_scripts"
+                  :sample-texts="regexSampleTexts"
+                />
+              </div>
+
+              <div v-if="detail?.extension_keys?.length" class="parchment-block">
                 <h4>内嵌扩展字段 (Extensions)</h4>
                 <div class="tag-strip">
                   <span v-for="k in detail?.extension_keys || []" :key="k" class="stamp-badge stamp-ink">{{ k }}</span>
-                </div>
-              </div>
-
-              <div v-if="detail?.regex_scripts?.length" class="parchment-block">
-                <h4>内嵌正则脚本 ({{ detail.regex_scripts.length }})</h4>
-                <div class="entry-list">
-                  <div v-for="r in detail.regex_scripts" :key="r.id" class="entry-card">
-                    <div class="entry-head">
-                      <div class="entry-title-group">
-                        <span class="led-dot" :class="r.disabled ? 'led-off' : 'led-green'"></span>
-                        <strong>{{ r.scriptName }}</strong>
-                      </div>
-                    </div>
-                    <div class="regex-code">Find: <code>{{ r.findRegex }}</code></div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -661,6 +676,9 @@ async function handleDelete() {
 
             <!-- OTHER: OVERVIEW -->
             <div v-else-if="item.category === 'other' && activeTab === 'overview'" class="parchment-stack">
+              <div v-if="detail?.regex_scripts?.length" class="parchment-block">
+                <RegexPreviewPanel :scripts="detail.regex_scripts" />
+              </div>
               <div class="parchment-block">
                 <h4>档案摘要</h4>
                 <p>{{ item.summary }}</p>
@@ -733,6 +751,24 @@ async function handleDelete() {
         </template>
       </section>
     </div>
+
+    <!-- Reusable Delete Confirmation Modal -->
+    <AppModal
+      :open="deleteModalOpen"
+      title="确认永久删除档案"
+      subtitle="此操作将同时移除数据库索引与本地原始文件，不可恢复"
+      confirm-text="永久删除"
+      cancel-text="取消"
+      :danger="true"
+      :loading="deleting"
+      max-width="440px"
+      @close="deleteModalOpen = false"
+      @confirm="confirmDelete"
+    >
+      <p style="margin: 0">
+        确定要从本地仓库永久删除<strong>「{{ item?.name }}」</strong>吗？
+      </p>
+    </AppModal>
   </Teleport>
 </template>
 
