@@ -1,6 +1,7 @@
 node_modules/
 client/dist/
 data/
+logs/
 .DS_Store
 Thumbs.db
 *.log
