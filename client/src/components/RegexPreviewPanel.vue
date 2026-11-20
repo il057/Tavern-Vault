@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import {
   Eye,
   Code2,
@@ -14,6 +14,7 @@ import {
   ChevronRight,
 } from 'lucide-vue-next';
 import AppModal from './AppModal.vue';
+import { useTheme } from '../composables/useTheme.js';
 import {
   isVisualReplace,
   parseRegexString,
@@ -26,13 +27,19 @@ const props = defineProps({
   sampleTexts: { type: Array, default: () => [] },
 });
 
+const { resolvedTheme } = useTheme();
+
 const expandedId = ref(null);
 const viewModes = ref({}); // { [id]: 'preview' | 'code' | 'test' }
-const stageTheme = ref('dark'); // 'dark' | 'light'
+const stageTheme = ref(resolvedTheme.value); // 'dark' | 'light'
 const customInputs = ref({});
 const frameHeights = ref({});
 const copiedKey = ref('');
 const fullscreenScript = ref(null);
+
+watch(resolvedTheme, (theme) => {
+  stageTheme.value = theme;
+});
 
 // Auto-expand the first visual regex script if available
 onMounted(() => {
@@ -687,8 +694,10 @@ const renderedMap = computed(() => {
   margin: 0;
   padding: 10px 12px;
   border-radius: 8px;
-  background: #141a24;
-  color: #e2e8f0;
+  background: var(--code-bg);
+  color: var(--code-ink);
+  border: 1px solid var(--code-border);
+  box-shadow: var(--code-shadow);
   font-family: var(--font-mono);
   font-size: 12px;
   line-height: 1.55;

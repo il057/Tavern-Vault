@@ -620,14 +620,14 @@ const formatNum = (n) => {
 
 .lcd-k {
   font-size: 9.5px;
-  color: #64748b;
+  color: var(--lcd-key);
   letter-spacing: 0.08em;
 }
 
 .lcd-v {
   font-size: 13.5px;
   font-weight: 600;
-  color: #7dd3fc;
+  color: var(--lcd-value);
 }
 
 .hw-summary {
@@ -732,8 +732,9 @@ const formatNum = (n) => {
 }
 
 .thumb-preset {
-  background: #141a24;
-  color: #7dd3fc;
+  background: linear-gradient(180deg, var(--lcd-bg-start) 0%, var(--lcd-bg-end) 100%);
+  color: var(--lcd-value);
+  border-color: var(--lcd-border);
 }
 
 .list-thumb img {

@@ -74,9 +74,47 @@
   --hw-inset: rgba(255, 255, 255, 0.95);
   --hw-lip: #cbd5e1;
   --hw-lip-hover: #b8c4d4;
-  --lcd-bezel-bottom: rgba(255, 255, 255, 0.8);
 
-  /* Hardware Module & Dark Readout */
+  /* Studio Nameplate (Light) */
+  --plaque-bg-start: #ffffff;
+  --plaque-bg-end: #eef2f8;
+  --plaque-border: #cbd5e1;
+  --plaque-inset: rgba(255, 255, 255, 0.95);
+  --plaque-shadow: 0 2px 0 #d5dde9, 0 6px 14px rgba(15, 23, 42, 0.07);
+  --plaque-title: #0f172a;
+  --plaque-sub: #64748b;
+  --plaque-screw-bg: radial-gradient(circle at 35% 30%, #f8fafc 0%, #cbd5e1 62%, #94a3b8 100%);
+  --plaque-screw-shadow: 0 1px 1px rgba(15, 23, 42, 0.22);
+
+  /* Preset Readout Screen (Light) */
+  --lcd-bg-start: #f5f8fd;
+  --lcd-bg-end: #eaf0f8;
+  --lcd-border: #cfd8e6;
+  --lcd-inset-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.06);
+  --lcd-bezel-bottom: rgba(255, 255, 255, 0.85);
+  --lcd-key: #64748b;
+  --lcd-value: #2b44b8;
+  --lcd-value-glow: none;
+  --lcd-cell-bg: rgba(255, 255, 255, 0.82);
+  --lcd-cell-border: #dce4f0;
+
+  /* Code Blocks (Light) */
+  --code-bg: #f4f7fb;
+  --code-ink: #1e293b;
+  --code-border: #d8e0ec;
+  --code-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.05);
+
+  /* Toast Plaque (Light) */
+  --toast-bg-start: #ffffff;
+  --toast-bg-end: #f4f7fb;
+  --toast-ink: #111827;
+  --toast-border: #cfd8e6;
+  --toast-inset: rgba(255, 255, 255, 0.9);
+  --toast-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+  --toast-error-ink: #c92a2a;
+  --toast-error-border: #ffa8a8;
+
+  /* Hardware Module & Indicators */
   --slate-dark: #141a24;
   --slate-mid: #1e2636;
   --led-green: #34d399;
@@ -174,7 +212,45 @@
   --hw-inset: rgba(255, 255, 255, 0.08);
   --hw-lip: #0c1018;
   --hw-lip-hover: #090d14;
+
+  /* Studio Nameplate (Dark) */
+  --plaque-bg-start: #1d2534;
+  --plaque-bg-end: #141a24;
+  --plaque-border: #2b3850;
+  --plaque-inset: rgba(255, 255, 255, 0.12);
+  --plaque-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  --plaque-title: #f8fafc;
+  --plaque-sub: #94a3b8;
+  --plaque-screw-bg: radial-gradient(circle at 35% 30%, #cbd5e1 0%, #64748b 65%, #334155 100%);
+  --plaque-screw-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+
+  /* Preset Readout Screen (Dark OLED) */
+  --lcd-bg-start: #121824;
+  --lcd-bg-end: #192233;
+  --lcd-border: #0b0f17;
+  --lcd-inset-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.65);
   --lcd-bezel-bottom: rgba(255, 255, 255, 0.08);
+  --lcd-key: #94a3b8;
+  --lcd-value: #7dd3fc;
+  --lcd-value-glow: 0 0 8px rgba(56, 189, 248, 0.25);
+  --lcd-cell-bg: rgba(255, 255, 255, 0.04);
+  --lcd-cell-border: rgba(125, 211, 252, 0.14);
+
+  /* Code Blocks (Dark) */
+  --code-bg: #111722;
+  --code-ink: #e2e8f0;
+  --code-border: #243044;
+  --code-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.45);
+
+  /* Toast Plaque (Dark) */
+  --toast-bg-start: #1f2736;
+  --toast-bg-end: #141a24;
+  --toast-ink: #f8fafc;
+  --toast-border: #2e394d;
+  --toast-inset: rgba(255, 255, 255, 0.1);
+  --toast-shadow: 0 10px 26px rgba(0, 0, 0, 0.42);
+  --toast-error-ink: #ffe3e3;
+  --toast-error-border: #e03131;
 
   /* Scrollbar */
   --scrollbar-thumb: rgba(148, 163, 184, 0.24);
@@ -217,28 +293,21 @@ body,
 /* Architectural Studio Nameplate */
 .studio-plaque {
   position: relative;
-  background: linear-gradient(180deg, #1d2534 0%, #141a24 100%);
-  color: #f8fafc;
-  border: 1px solid #0f141d;
+  background: linear-gradient(180deg, var(--plaque-bg-start) 0%, var(--plaque-bg-end) 100%);
+  color: var(--plaque-title);
+  border: 1px solid var(--plaque-border);
   border-radius: 11px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    0 4px 12px rgba(15, 23, 42, 0.16);
-}
-
-:root[data-theme='dark'] .studio-plaque {
-  border-color: #2b3850;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    0 6px 16px rgba(0, 0, 0, 0.4);
+    inset 0 1px 0 var(--plaque-inset),
+    var(--plaque-shadow);
 }
 
 .studio-pin-screw {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #cbd5e1 0%, #64748b 65%, #334155 100%);
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+  background: var(--plaque-screw-bg);
+  box-shadow: var(--plaque-screw-shadow);
 }
 
 /* Top Frosted Studio Console */
@@ -523,15 +592,15 @@ body,
 
 /* Crisp OLED / LCD Readout Screen */
 .lcd-screen {
-  background: linear-gradient(180deg, #121824 0%, #192233 100%);
-  border: 1px solid #0b0f17;
+  background: linear-gradient(180deg, var(--lcd-bg-start) 0%, var(--lcd-bg-end) 100%);
+  border: 1px solid var(--lcd-border);
   border-radius: 8px;
   box-shadow:
-    inset 0 2px 6px rgba(0, 0, 0, 0.65),
+    var(--lcd-inset-shadow),
     0 1px 0 var(--lcd-bezel-bottom);
   font-family: var(--font-mono);
-  color: #7dd3fc;
-  text-shadow: 0 0 8px rgba(56, 189, 248, 0.25);
+  color: var(--lcd-value);
+  text-shadow: var(--lcd-value-glow);
 }
 
 /* Glowing Physical LED */

@@ -160,7 +160,7 @@ const navItems = [
   font-family: var(--font-mono);
   font-size: 9.5px;
   letter-spacing: 0.14em;
-  color: #94a3b8;
+  color: var(--plaque-sub);
   margin-bottom: 4px;
 }
 
@@ -177,14 +177,14 @@ const navItems = [
   font-weight: 800;
   font-size: 15.5px;
   letter-spacing: 0.14em;
-  color: #f8fafc;
+  color: var(--plaque-title);
 }
 
 .plate-sub {
   margin-top: 3px;
   font-size: 11px;
   font-weight: 500;
-  color: #94a3b8;
+  color: var(--plaque-sub);
   letter-spacing: 0.06em;
 }
 

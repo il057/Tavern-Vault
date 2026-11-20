@@ -33,16 +33,16 @@ defineProps({
   border-radius: 10px;
   font-size: 13px;
   font-weight: 500;
-  color: #f8fafc;
-  background: linear-gradient(180deg, #1f2736 0%, #141a24 100%);
-  border: 1px solid #2e394d;
+  color: var(--toast-ink);
+  background: linear-gradient(180deg, var(--toast-bg-start) 0%, var(--toast-bg-end) 100%);
+  border: 1px solid var(--toast-border);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    0 10px 26px rgba(15, 23, 42, 0.28);
+    inset 0 1px 0 var(--toast-inset),
+    var(--toast-shadow);
 }
 
 .toast-plaque.error {
-  border-color: #e03131;
-  color: #ffe3e3;
+  border-color: var(--toast-error-border);
+  color: var(--toast-error-ink);
 }
 </style>

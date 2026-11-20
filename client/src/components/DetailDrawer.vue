@@ -1133,19 +1133,19 @@ async function confirmDelete() {
   gap: 4px;
   padding: 8px 10px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(125, 211, 252, 0.14);
+  background: var(--lcd-cell-bg);
+  border: 1px solid var(--lcd-cell-border);
 }
 
 .param-k {
   font-size: 10.5px;
-  color: #94a3b8;
+  color: var(--lcd-key);
 }
 
 .param-v {
   font-size: 14px;
   font-weight: 600;
-  color: #7dd3fc;
+  color: var(--lcd-value);
 }
 
 /* Theme Live Preview */
@@ -1250,15 +1250,15 @@ async function confirmDelete() {
   margin: 0;
   padding: 14px 16px;
   border-radius: 10px;
-  background: #141a24;
-  color: #e2e8f0;
+  background: var(--code-bg);
+  color: var(--code-ink);
   font-family: var(--font-mono);
   font-size: 12px;
   line-height: 1.6;
   overflow-x: auto;
   max-height: 62vh;
-  border: 1px solid #0b0f17;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--code-border);
+  box-shadow: var(--code-shadow);
 }
 
 /* Edit Form */
