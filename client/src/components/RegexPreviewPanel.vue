@@ -63,9 +63,9 @@ function onFrameMessage(e) {
 
 function classifyScript(script) {
   const rep = (script.replaceString || '').trim();
-  if (!rep) return { type: 'strip', label: '隐藏/清除规则', badgeClass: 'stamp-ink' };
-  if (isVisualReplace(rep)) return { type: 'html', label: 'HTML 样式渲染', badgeClass: 'stamp-cobalt' };
-  return { type: 'text', label: '文本替换', badgeClass: 'stamp-mint' };
+  if (!rep) return { type: 'strip', label: '隐藏/清除规则', badgeClass: 'badge-neutral' };
+  if (isVisualReplace(rep)) return { type: 'html', label: 'HTML 样式渲染', badgeClass: 'badge-sage' };
+  return { type: 'text', label: '文本替换', badgeClass: 'badge-sage' };
 }
 
 /**
@@ -196,9 +196,9 @@ const renderedMap = computed(() => {
         <span class="regex-hint">支持 HTML/CSS 前端样式实时沙盒预览</span>
       </div>
 
-      <div class="rocker-group" title="切换预览画布明暗背景">
+      <div class="segmented-group" title="切换预览画布明暗背景">
         <button
-          class="rocker-btn"
+          class="segmented-btn"
           :class="{ active: stageTheme === 'dark' }"
           @click="stageTheme = 'dark'"
         >
@@ -206,7 +206,7 @@ const renderedMap = computed(() => {
           <span>暗色舞台</span>
         </button>
         <button
-          class="rocker-btn"
+          class="segmented-btn"
           :class="{ active: stageTheme === 'light' }"
           @click="stageTheme = 'light'"
         >
@@ -221,14 +221,14 @@ const renderedMap = computed(() => {
         <div class="regex-head" @click="toggleExpand(r.id)">
           <div class="regex-head-left">
             <component :is="expandedId === r.id ? ChevronDown : ChevronRight" :size="15" class="chevron" />
-            <span class="led-dot" :class="r.disabled ? 'led-off' : 'led-green'"></span>
+            <span class="status-dot" :class="r.disabled ? 'muted' : 'active'"></span>
             <strong class="regex-name">{{ r.scriptName }}</strong>
-            <span class="stamp-badge" :class="classifyScript(r).badgeClass">
+            <span class="status-badge" :class="classifyScript(r).badgeClass">
               {{ classifyScript(r).label }}
             </span>
             <span
               v-if="renderedMap[r.id]?.source === 'card-match' && classifyScript(r).type === 'html'"
-              class="stamp-badge stamp-mint"
+              class="status-badge badge-sage"
               title="已自动匹配当前角色卡开场白中的真实文本进行渲染"
             >
               <Sparkles :size="10" />
@@ -237,9 +237,9 @@ const renderedMap = computed(() => {
           </div>
 
           <div v-if="expandedId === r.id" class="regex-head-actions" @click.stop>
-            <div class="rocker-group mini-rocker">
+            <div class="segmented-group mini-rocker">
               <button
-                class="rocker-btn"
+                class="segmented-btn"
                 :class="{ active: getMode(r.id) === 'preview' }"
                 @click="setMode(r.id, 'preview')"
               >
@@ -247,7 +247,7 @@ const renderedMap = computed(() => {
                 <span>样式预览</span>
               </button>
               <button
-                class="rocker-btn"
+                class="segmented-btn"
                 :class="{ active: getMode(r.id) === 'test' }"
                 @click="setMode(r.id, 'test')"
               >
@@ -255,7 +255,7 @@ const renderedMap = computed(() => {
                 <span>实测</span>
               </button>
               <button
-                class="rocker-btn"
+                class="segmented-btn"
                 :class="{ active: getMode(r.id) === 'code' }"
                 @click="setMode(r.id, 'code')"
               >
@@ -266,7 +266,7 @@ const renderedMap = computed(() => {
 
             <button
               v-if="classifyScript(r).type === 'html'"
-              class="skeuo-btn skeuo-btn-paper icon-only-btn"
+              class="glass-pill-btn compact icon-only-btn"
               title="放大弹窗预览"
               @click="fullscreenScript = r"
             >
@@ -350,7 +350,7 @@ const renderedMap = computed(() => {
             <div class="code-section">
               <div class="code-bar">
                 <span>Find Regex</span>
-                <button class="skeuo-btn skeuo-btn-paper mini-copy" @click="copyText(r.findRegex, `find-${r.id}`)">
+                <button class="glass-pill-btn compact mini-copy" @click="copyText(r.findRegex, `find-${r.id}`)">
                   <Check v-if="copiedKey === `find-${r.id}`" :size="12" />
                   <Copy v-else :size="12" />
                   <span>{{ copiedKey === `find-${r.id}` ? '已复制' : '复制' }}</span>
@@ -362,7 +362,7 @@ const renderedMap = computed(() => {
             <div class="code-section">
               <div class="code-bar">
                 <span>Replace String ({{ (r.replaceString || '').length }} 字符)</span>
-                <button class="skeuo-btn skeuo-btn-paper mini-copy" @click="copyText(r.replaceString, `rep-${r.id}`)">
+                <button class="glass-pill-btn compact mini-copy" @click="copyText(r.replaceString, `rep-${r.id}`)">
                   <Check v-if="copiedKey === `rep-${r.id}`" :size="12" />
                   <Copy v-else :size="12" />
                   <span>{{ copiedKey === `rep-${r.id}` ? '已复制' : '复制' }}</span>
@@ -394,9 +394,9 @@ const renderedMap = computed(() => {
                   : '当前展示：占位符自动模拟填充渲染'
             }}
           </span>
-          <div class="rocker-group">
+          <div class="segmented-group">
             <button
-              class="rocker-btn"
+              class="segmented-btn"
               :class="{ active: stageTheme === 'dark' }"
               @click="stageTheme = 'dark'"
             >
@@ -404,7 +404,7 @@ const renderedMap = computed(() => {
               <span>暗色舞台</span>
             </button>
             <button
-              class="rocker-btn"
+              class="segmented-btn"
               :class="{ active: stageTheme === 'light' }"
               @click="stageTheme = 'light'"
             >
@@ -467,11 +467,23 @@ const renderedMap = computed(() => {
 }
 
 .regex-card {
-  border-radius: 10px;
-  background: var(--surface-card);
-  border: 1px solid var(--border-light);
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  border-radius: 16px;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(240, 248, 255, 0.16) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.54);
+  box-shadow:
+    0 4px 16px rgba(15, 28, 52, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
   overflow: hidden;
+}
+
+:root[data-theme='dark'] .regex-card {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 .regex-head {
@@ -482,8 +494,12 @@ const renderedMap = computed(() => {
   gap: 10px;
   cursor: pointer;
   flex-wrap: wrap;
-  background: var(--surface-subtle);
+  background: rgba(255, 255, 255, 0.24);
   border-bottom: 1px solid var(--border-light);
+}
+
+:root[data-theme='dark'] .regex-head {
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .regex-head:hover {
@@ -512,7 +528,7 @@ const renderedMap = computed(() => {
   gap: 6px;
 }
 
-.mini-rocker .rocker-btn {
+.mini-rocker .segmented-btn {
   padding: 4px 8px;
   font-size: 11.5px;
 }
@@ -540,7 +556,7 @@ const renderedMap = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  background: var(--surface-card);
+  background: transparent;
 }
 
 .stage-meta {
@@ -556,7 +572,7 @@ const renderedMap = computed(() => {
 }
 
 .meta-pill.ok {
-  color: var(--accent-mint-text);
+  color: var(--color-focus);
   font-weight: 600;
 }
 
@@ -628,7 +644,7 @@ const renderedMap = computed(() => {
 .link-clear {
   border: none;
   background: transparent;
-  color: var(--accent-cobalt);
+  color: var(--color-focus);
   font-size: 12px;
   cursor: pointer;
   padding: 0;
@@ -650,8 +666,8 @@ const renderedMap = computed(() => {
 
 .test-textarea:focus {
   background: var(--surface-input);
-  border-color: var(--accent-cobalt);
-  box-shadow: 0 0 0 3px var(--accent-cobalt-ring);
+  border-color: var(--color-focus);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 .miss-tip {

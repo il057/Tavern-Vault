@@ -1,48 +1,65 @@
 <script setup>
+import LiquidGlass from './LiquidGlass.vue';
+
 defineProps({
   toasts: { type: Array, default: () => [] },
 });
 </script>
 
 <template>
-  <div class="toast-rack">
-    <div v-for="t in toasts" :key="t.id" class="toast-plaque" :class="t.type">
-      <span class="led-dot" :class="t.type === 'error' ? 'led-amber' : 'led-green'"></span>
-      <span>{{ t.text }}</span>
-    </div>
+  <div class="toast-rack" aria-live="polite">
+    <LiquidGlass
+      v-for="t in toasts"
+      :key="t.id"
+      variant="tinted"
+      :radius="999"
+      :bezel-width="14"
+      :blur="4"
+      :dispersion="true"
+      class="toast-pill"
+      :class="t.type"
+    >
+      <span class="toast-inner">
+        <span class="status-dot" :class="t.type === 'error' ? 'amber' : 'active'"></span>
+        <span class="toast-text">{{ t.text }}</span>
+      </span>
+    </LiquidGlass>
   </div>
 </template>
 
 <style scoped>
 .toast-rack {
   position: fixed;
-  right: 22px;
-  bottom: 22px;
+  right: var(--spacing-24);
+  bottom: var(--spacing-24);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--spacing-8);
   z-index: 200;
   pointer-events: none;
 }
 
-.toast-plaque {
+.toast-pill {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  padding: 10px 16px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--toast-ink);
-  background: linear-gradient(180deg, var(--toast-bg-start) 0%, var(--toast-bg-end) 100%);
-  border: 1px solid var(--toast-border);
-  box-shadow:
-    inset 0 1px 0 var(--toast-inset),
-    var(--toast-shadow);
+  min-height: 44px;
+  padding: 0 18px;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--ink-primary);
+  box-shadow: var(--elevation-transient);
 }
 
-.toast-plaque.error {
-  border-color: var(--toast-error-border);
-  color: var(--toast-error-ink);
+.toast-inner {
+  position: relative;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toast-pill.error {
+  border-color: var(--accent-danger-border);
+  color: var(--accent-danger-text);
 }
 </style>

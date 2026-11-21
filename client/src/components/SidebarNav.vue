@@ -12,6 +12,7 @@ import {
   HardDrive,
 } from 'lucide-vue-next';
 import { formatBytes } from '../api/vault.js';
+import LiquidGlass from './LiquidGlass.vue';
 
 defineProps({
   stats: { type: Object, required: true },
@@ -34,170 +35,179 @@ const navItems = [
 </script>
 
 <template>
-  <aside class="rail-panel sidebar">
-    <!-- Modern Architectural Studio Plaque -->
-    <div class="studio-plaque nameplate">
-      <span class="studio-pin-screw screw-tl"></span>
-      <span class="studio-pin-screw screw-tr"></span>
-      <span class="studio-pin-screw screw-bl"></span>
-      <span class="studio-pin-screw screw-br"></span>
-      <div class="plate-badge">
-        <span class="plate-dot"></span>
-        <span>ARCHIVE BOARD</span>
-      </div>
-      <div class="plate-title">TAVERN VAULT</div>
-      <div class="plate-sub">酒馆档案墙 · 本地收藏库</div>
-    </div>
+  <div class="sidebar-float-wrap">
+    <LiquidGlass
+      tag="aside"
+      variant="surface"
+      :radius="28"
+      :bezel-width="22"
+      :blur="3"
+      :saturate="1.45"
+      :dispersion="true"
+      :max-dim="640"
+      :strength="0.68"
+      class="sidebar"
+    >
+      <div class="sidebar-inner">
+        <!-- Minimal Typographic Brand Header -->
+        <div class="brand-header">
+          <div class="brand-kicker">ARCHIVE VAULT</div>
+          <div class="brand-title">Tavern Vault</div>
+          <div class="brand-sub">酒馆档案墙 · 本地收藏库</div>
+        </div>
 
-    <!-- Category Index Tabs -->
-    <div class="nav-section">
-      <div class="section-label">档案分区</div>
-      <nav class="nav-list">
-        <button
-          v-for="item in navItems"
-          :key="item.key"
-          class="nav-tab"
-          :class="{ active: !onlyFavorites && activeCategory === item.key && !activeFolder && !activeTag }"
-          @click="emit('select-category', item.key)"
-        >
-          <span class="tab-left">
-            <component :is="item.icon" :size="16" />
-            <span>{{ item.label }}</span>
-          </span>
-          <span class="tab-count">{{ stats.counts?.[item.key] ?? 0 }}</span>
-        </button>
+        <!-- Category Index Pills -->
+        <div class="nav-section">
+          <div class="section-label">档案分区</div>
+          <nav class="nav-list" aria-label="档案分区">
+            <button
+              v-for="item in navItems"
+              :key="item.key"
+              type="button"
+              class="nav-tab"
+              :class="{ active: !onlyFavorites && activeCategory === item.key && !activeFolder && !activeTag }"
+              @click="emit('select-category', item.key)"
+            >
+              <span class="tab-left">
+                <component :is="item.icon" :size="16" />
+                <span>{{ item.label }}</span>
+              </span>
+              <span class="tab-count">{{ stats.counts?.[item.key] ?? 0 }}</span>
+            </button>
 
-        <button
-          class="nav-tab fav-tab"
-          :class="{ active: onlyFavorites }"
-          @click="emit('toggle-favorites')"
-        >
-          <span class="tab-left">
-            <Star :size="16" :fill="onlyFavorites ? 'currentColor' : 'none'" />
-            <span>星标珍藏</span>
-          </span>
-          <span class="tab-count">{{ stats.counts?.favorite ?? 0 }}</span>
-        </button>
-      </nav>
-    </div>
+            <button
+              type="button"
+              class="nav-tab fav-tab"
+              :class="{ active: onlyFavorites }"
+              @click="emit('toggle-favorites')"
+            >
+              <span class="tab-left">
+                <Star :size="16" :fill="onlyFavorites ? 'currentColor' : 'none'" />
+                <span>星标珍藏</span>
+              </span>
+              <span class="tab-count">{{ stats.counts?.favorite ?? 0 }}</span>
+            </button>
+          </nav>
+        </div>
 
-    <!-- Folders / Collections -->
-    <div v-if="stats.folders && stats.folders.length" class="nav-section">
-      <div class="section-label">收藏分组</div>
-      <div class="nav-list">
-        <button
-          v-for="f in stats.folders"
-          :key="f.name"
-          class="nav-tab small-tab"
-          :class="{ active: activeFolder === f.name }"
-          @click="emit('select-folder', activeFolder === f.name ? '' : f.name)"
-        >
-          <span class="tab-left">
-            <Folder :size="14" />
-            <span class="truncate">{{ f.name }}</span>
-          </span>
-          <span class="tab-count">{{ f.count }}</span>
-        </button>
-      </div>
-    </div>
+        <!-- Folders / Collections -->
+        <div v-if="stats.folders && stats.folders.length" class="nav-section">
+          <div class="section-label">收藏分组</div>
+          <div class="nav-list">
+            <button
+              v-for="f in stats.folders"
+              :key="f.name"
+              type="button"
+              class="nav-tab small-tab"
+              :class="{ active: activeFolder === f.name }"
+              @click="emit('select-folder', activeFolder === f.name ? '' : f.name)"
+            >
+              <span class="tab-left">
+                <Folder :size="14" />
+                <span class="truncate">{{ f.name }}</span>
+              </span>
+              <span class="tab-count">{{ f.count }}</span>
+            </button>
+          </div>
+        </div>
 
-    <!-- Tags -->
-    <div v-if="stats.tags && stats.tags.length" class="nav-section tags-section">
-      <div class="section-label">索引贴纸</div>
-      <div class="tag-cloud">
-        <button
-          v-for="t in stats.tags.slice(0, 24)"
-          :key="t.name"
-          class="sticker-tag"
-          :class="{ active: activeTag === t.name }"
-          @click="emit('select-tag', activeTag === t.name ? '' : t.name)"
-        >
-          <Tag :size="11" />
-          <span>{{ t.name }}</span>
-          <small>{{ t.count }}</small>
-        </button>
-      </div>
-    </div>
+        <!-- Tags -->
+        <div v-if="stats.tags && stats.tags.length" class="nav-section tags-section">
+          <div class="section-label">标签索引</div>
+          <div class="tag-cloud">
+            <button
+              v-for="t in stats.tags.slice(0, 24)"
+              :key="t.name"
+              type="button"
+              class="tag-pill"
+              :class="{ active: activeTag === t.name }"
+              @click="emit('select-tag', activeTag === t.name ? '' : t.name)"
+            >
+              <Tag :size="11" />
+              <span>{{ t.name }}</span>
+              <small>{{ t.count }}</small>
+            </button>
+          </div>
+        </div>
 
-    <!-- Bottom Storage Gauge -->
-    <div class="storage-gauge recessed-well">
-      <div class="gauge-row">
-        <span class="gauge-label">
-          <HardDrive :size="13" />
-          本地库容量
-        </span>
-        <span class="gauge-value">{{ formatBytes(stats.totalSize) }}</span>
+        <!-- Bottom Recessed Crystal Storage Well -->
+        <div class="storage-well">
+          <div class="gauge-row">
+            <span class="gauge-label">
+              <HardDrive :size="13" />
+              本地库容量
+            </span>
+            <span class="gauge-value">{{ formatBytes(stats.totalSize) }}</span>
+          </div>
+          <div class="gauge-meta">
+            <span class="status-dot active"></span>
+            <span>SQLite 本地归档 · {{ stats.counts?.all ?? 0 }} 份</span>
+          </div>
+        </div>
       </div>
-      <div class="gauge-meta">
-        <span class="led-dot led-green"></span>
-        <span>SQLite 本地归档 · {{ stats.counts?.all ?? 0 }} 份档案</span>
-      </div>
-    </div>
-  </aside>
+    </LiquidGlass>
+  </div>
 </template>
 
 <style scoped>
-.sidebar {
-  width: 262px;
+.sidebar-float-wrap {
   flex-shrink: 0;
+  padding: var(--spacing-16) 0 var(--spacing-16) var(--spacing-16);
+  display: flex;
+  z-index: 15;
+}
+
+.sidebar {
+  width: 264px;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 18px 16px 16px;
-  gap: 18px;
-  overflow-y: auto;
-  z-index: 6;
+  overflow: hidden;
 }
 
-.nameplate {
-  padding: 14px 16px 13px;
-  text-align: center;
+.sidebar-inner {
+  position: relative;
+  z-index: 4;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 20px var(--spacing-16) var(--spacing-16);
+  gap: 20px;
 }
 
-.plate-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
+.brand-header {
+  padding: var(--spacing-4) var(--spacing-8);
+}
+
+.brand-kicker {
   font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-size: 10.5px;
+  font-weight: var(--font-weight-semibold);
   letter-spacing: 0.14em;
-  color: var(--plaque-sub);
+  color: var(--color-focus);
   margin-bottom: 4px;
 }
 
-.plate-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent-vermilion);
-  box-shadow: 0 0 6px rgba(232, 89, 12, 0.75);
-}
-
-.plate-title {
+.brand-title {
   font-family: var(--font-sans);
-  font-weight: 800;
-  font-size: 15.5px;
-  letter-spacing: 0.14em;
-  color: var(--plaque-title);
+  font-weight: var(--font-weight-semibold);
+  font-size: 20px;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--ink-primary);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.35);
 }
 
-.plate-sub {
+:root[data-theme='dark'] .brand-title {
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.brand-sub {
   margin-top: 3px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--plaque-sub);
-  letter-spacing: 0.06em;
+  font-size: var(--text-label);
+  color: var(--ink-muted);
 }
-
-.screw-tl,
-.screw-tr,
-.screw-bl,
-.screw-br {
-  position: absolute;
-}
-.screw-tl { top: 7px; left: 7px; }
-.screw-tr { top: 7px; right: 7px; }
-.screw-bl { bottom: 7px; left: 7px; }
-.screw-br { bottom: 7px; right: 7px; }
 
 .nav-section {
   display: flex;
@@ -207,11 +217,11 @@ const navItems = [
 
 .section-label {
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.06em;
   color: var(--ink-muted);
   text-transform: uppercase;
-  padding: 0 8px;
+  padding: 0 var(--spacing-12);
 }
 
 .nav-list {
@@ -221,65 +231,96 @@ const navItems = [
 }
 
 .nav-tab {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 8.5px 11px;
-  border-radius: 8px;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
   border: 1px solid transparent;
   background: transparent;
   color: var(--ink-secondary);
-  font-size: 13.5px;
-  font-weight: 500;
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all 0.14s ease;
+  transition:
+    transform var(--ease-spring),
+    background 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 180ms ease;
 }
 
 .nav-tab:hover {
-  background: var(--surface-hover);
+  background: rgba(255, 255, 255, 0.32);
+  border-color: rgba(255, 255, 255, 0.48);
   color: var(--ink-primary);
 }
 
-.nav-tab.active {
-  color: var(--accent-cobalt-text);
-  background: var(--accent-cobalt-soft);
-  border-color: var(--accent-cobalt-border);
-  font-weight: 600;
-  box-shadow: 0 1px 2px rgba(59, 91, 219, 0.08);
+:root[data-theme='dark'] .nav-tab:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
-.nav-tab.active::before {
-  content: '';
-  position: absolute;
-  left: -1px;
-  top: 7px;
-  bottom: 7px;
-  width: 3px;
-  border-radius: 0 3px 3px 0;
-  background: var(--accent-cobalt);
+.nav-tab:active {
+  transform: scale(0.96);
+  transition: transform var(--ease-press);
+}
+
+/* Unified Liquid Glass Active Pill */
+.nav-tab.active {
+  color: #ffffff;
+  background: linear-gradient(
+    180deg,
+    rgba(59, 130, 246, 0.88) 0%,
+    rgba(37, 99, 235, 0.92) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.52);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.16),
+    0 6px 18px rgba(37, 99, 235, 0.28);
+}
+
+:root[data-theme='dark'] .nav-tab.active {
+  color: #ffffff;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.36);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.38),
+    0 6px 18px rgba(0, 0, 0, 0.3);
 }
 
 .fav-tab.active {
-  color: var(--accent-vermilion-text);
-  background: var(--accent-vermilion-soft);
-  border-color: var(--accent-vermilion-border);
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.9) 0%, rgba(217, 119, 6, 0.92) 100%);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.52),
+    0 6px 18px rgba(217, 119, 6, 0.28);
 }
 
-.fav-tab.active::before {
-  background: var(--accent-vermilion);
+:root[data-theme='dark'] .fav-tab.active {
+  background: linear-gradient(180deg, rgba(251, 191, 36, 0.28) 0%, rgba(217, 119, 6, 0.18) 100%);
+  border-color: rgba(251, 191, 36, 0.48);
+  color: #fde68a;
 }
 
 .small-tab {
-  padding: 7px 10px;
-  font-size: 12.5px;
+  min-height: 36px;
+  font-size: 13px;
 }
 
 .tab-left {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   min-width: 0;
 }
 
@@ -292,28 +333,30 @@ const navItems = [
 .tab-count {
   font-family: var(--font-mono);
   font-size: 11px;
-  padding: 1px 7px;
-  border-radius: 999px;
-  background: var(--surface-well);
-  border: 1px solid var(--border-light);
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.34);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: var(--ink-secondary);
+}
+
+:root[data-theme='dark'] .tab-count {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
   color: var(--ink-secondary);
 }
 
 .nav-tab.active .tab-count {
-  color: #ffffff;
-  background: var(--accent-cobalt);
-  border-color: #2b44b8;
-  font-weight: 600;
-}
-
-.fav-tab.active .tab-count {
-  background: var(--accent-vermilion);
-  border-color: #c2410c;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.32);
 }
 
 .tags-section {
   flex: 1;
   min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .tag-cloud {
@@ -322,53 +365,89 @@ const navItems = [
   gap: 6px;
 }
 
-.sticker-tag {
+.tag-pill {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 8px;
-  font-size: 11.5px;
+  min-height: 28px;
+  padding: 0 10px;
+  font-size: var(--text-label);
   color: var(--ink-secondary);
-  background: var(--surface-card);
-  border: 1px solid var(--border-mid);
-  border-radius: 6px;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  background: rgba(255, 255, 255, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.52);
+  border-radius: var(--radius-pill);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
   cursor: pointer;
-  transition: all 0.12s ease;
+  transition:
+    transform var(--ease-spring),
+    border-color 140ms ease,
+    color 140ms ease,
+    background 140ms ease;
 }
 
-.sticker-tag:hover {
-  border-color: var(--border-strong);
+:root[data-theme='dark'] .tag-pill {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.tag-pill:hover {
+  background: rgba(255, 255, 255, 0.52);
+  border-color: rgba(255, 255, 255, 0.85);
   color: var(--ink-primary);
-  transform: translateY(-1px);
 }
 
-.sticker-tag.active {
+:root[data-theme='dark'] .tag-pill:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+.tag-pill:active {
+  transform: scale(0.96);
+  transition: transform var(--ease-press);
+}
+
+.tag-pill.active {
   color: #ffffff;
-  background: var(--accent-cobalt);
-  border-color: #2b44b8;
-  font-weight: 600;
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.94) 100%);
+  border-color: rgba(255, 255, 255, 0.45);
 }
 
-.sticker-tag small {
+.tag-pill small {
   opacity: 0.72;
   font-family: var(--font-mono);
   font-size: 10px;
 }
 
-.storage-gauge {
+/* Recessed Liquid Glass Storage Well */
+.storage-well {
+  flex-shrink: 0;
   margin-top: auto;
-  padding: 10px 12px;
+  padding: 12px 14px;
+  border-radius: 18px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  background: rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    0 4px 14px rgba(15, 28, 52, 0.06);
+}
+
+:root[data-theme='dark'] .storage-well {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 4px 16px rgba(0, 0, 0, 0.22);
 }
 
 .gauge-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: 12.5px;
 }
 
 .gauge-label {
@@ -380,7 +459,7 @@ const navItems = [
 
 .gauge-value {
   font-family: var(--font-mono);
-  font-weight: 700;
+  font-weight: var(--font-weight-semibold);
   color: var(--ink-primary);
 }
 
@@ -388,7 +467,49 @@ const navItems = [
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 11px;
+  font-size: 11.5px;
   color: var(--ink-muted);
+}
+
+@media (max-width: 820px) {
+  .sidebar-float-wrap {
+    padding: 12px 16px 0;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    border-radius: 22px !important;
+  }
+
+  .sidebar-inner {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 8px 12px;
+    gap: 10px;
+  }
+
+  .brand-header,
+  .section-label,
+  .tags-section,
+  .storage-well {
+    display: none;
+  }
+
+  .nav-section {
+    flex-direction: row;
+  }
+
+  .nav-list {
+    flex-direction: row;
+    gap: 6px;
+  }
+
+  .nav-tab {
+    width: auto;
+    white-space: nowrap;
+  }
 }
 </style>

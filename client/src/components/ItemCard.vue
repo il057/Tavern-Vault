@@ -13,6 +13,7 @@ import {
   Image as ImageIcon,
 } from 'lucide-vue-next';
 import { formatBytes, getDownloadUrl } from '../api/vault.js';
+import LiquidGlass from './LiquidGlass.vue';
 
 const props = defineProps({
   item: { type: Object, required: true },
@@ -54,12 +55,22 @@ const formatNum = (n) => {
 </script>
 
 <template>
-  <!-- LIST VIEW -->
-  <div
+  <!-- LIST VIEW (Liquid Glass Row) -->
+  <LiquidGlass
     v-if="viewMode === 'list'"
-    class="list-row"
-    :class="item.category === 'preset' ? 'hardware-card' : 'paper-card'"
+    tag="div"
+    variant="surface"
+    :radius="20"
+    :bezel-width="16"
+    :blur="2"
+    :saturate="1.42"
+    :dispersion="true"
+    :max-dim="360"
+    :strength="0.65"
+    class="list-row liquid-card-interactive"
+    tabindex="0"
     @click="emit('open', item)"
+    @keydown.enter.self="emit('open', item)"
   >
     <div class="list-thumb" :class="`thumb-${item.category}`">
       <img v-if="item.cover_url" :src="item.cover_url" :alt="item.name" />
@@ -73,10 +84,10 @@ const formatNum = (n) => {
     <div class="list-main">
       <div class="list-title-row">
         <span class="list-title">{{ item.name }}</span>
-        <span class="stamp-badge" :class="item.format === 'png' ? 'stamp-vermilion' : 'stamp-cobalt'">
+        <span class="status-badge" :class="item.format === 'png' ? 'badge-scene' : 'badge-sage'">
           {{ item.format.toUpperCase() }}
         </span>
-        <span class="stamp-badge stamp-ink">{{ categoryLabel }}</span>
+        <span class="status-badge badge-neutral">{{ categoryLabel }}</span>
         <span v-if="item.folder" class="folder-chip">
           <Folder :size="11" /> {{ item.folder }}
         </span>
@@ -87,9 +98,11 @@ const formatNum = (n) => {
     <div class="list-meta">
       <span class="mono-size">{{ formatBytes(item.file_size) }}</span>
       <button
+        type="button"
         class="icon-action"
         :class="{ starred: item.favorite }"
         title="星标收藏"
+        aria-label="星标收藏"
         @click.stop="emit('toggle-favorite', item)"
       >
         <Star :size="15" :fill="item.favorite ? 'currentColor' : 'none'" />
@@ -98,252 +111,352 @@ const formatNum = (n) => {
         :href="getDownloadUrl(item.id)"
         class="icon-action"
         title="下载原文件"
+        aria-label="下载原文件"
         @click.stop
       >
         <Download :size="15" />
       </a>
     </div>
-  </div>
+  </LiquidGlass>
 
-  <!-- GRID VIEW: PRESET (Modern Anodized Hardware Module) -->
-  <article
+  <!-- GRID VIEW: PRESET (Liquid Glass Tile) -->
+  <LiquidGlass
     v-else-if="item.category === 'preset'"
-    class="hardware-card grid-card preset-card"
+    tag="article"
+    variant="surface"
+    :radius="24"
+    :bezel-width="22"
+    :blur="2"
+    :saturate="1.42"
+    :dispersion="true"
+    :max-dim="360"
+    :strength="0.72"
+    class="grid-card preset-card liquid-card-interactive"
+    tabindex="0"
     @click="emit('open', item)"
+    @keydown.enter.self="emit('open', item)"
   >
-    <span class="pin-magnet pin-cobalt"></span>
-
-    <div class="hw-header">
-      <div class="hw-left">
-        <span class="led-dot" :class="item.metadata?.prompts_enabled > 0 ? 'led-green' : 'led-amber'"></span>
-        <span class="hw-model">PRESET MODULE</span>
+    <div class="card-layer preset-layer">
+      <div class="card-top-row">
+        <div class="preset-kicker">
+          <span class="status-dot" :class="item.metadata?.prompts_enabled > 0 ? 'active' : 'amber'"></span>
+          <span>PRESET</span>
+        </div>
+        <div class="card-inline-actions">
+          <button
+            type="button"
+            class="icon-action"
+            :class="{ starred: item.favorite }"
+            title="收藏"
+            aria-label="收藏"
+            @click.stop="emit('toggle-favorite', item)"
+          >
+            <Star :size="15" :fill="item.favorite ? 'currentColor' : 'none'" />
+          </button>
+          <a
+            :href="getDownloadUrl(item.id)"
+            class="icon-action"
+            title="下载原文件"
+            aria-label="下载原文件"
+            @click.stop
+          >
+            <Download :size="15" />
+          </a>
+        </div>
       </div>
-      <div class="card-actions">
-        <button
-          class="mini-tool-btn"
-          :class="{ starred: item.favorite }"
-          title="收藏"
-          @click.stop="emit('toggle-favorite', item)"
-        >
-          <Star :size="14" :fill="item.favorite ? 'currentColor' : 'none'" />
-        </button>
-        <a :href="getDownloadUrl(item.id)" class="mini-tool-btn" title="下载原文件" @click.stop>
-          <Download :size="14" />
-        </a>
+
+      <h3 class="card-title" :title="item.name">{{ item.name }}</h3>
+
+      <div class="param-grid">
+        <div class="param-cell">
+          <span class="param-k">TEMP</span>
+          <span class="param-v">{{ item.metadata?.temperature ?? '—' }}</span>
+        </div>
+        <div class="param-cell">
+          <span class="param-k">TOP-P</span>
+          <span class="param-v">{{ item.metadata?.top_p ?? '—' }}</span>
+        </div>
+        <div class="param-cell">
+          <span class="param-k">CTX</span>
+          <span class="param-v">{{ formatNum(item.metadata?.max_context) }}</span>
+        </div>
+        <div class="param-cell">
+          <span class="param-k">PROMPTS</span>
+          <span class="param-v">{{ item.metadata?.prompts_enabled ?? 0 }}/{{ item.metadata?.prompts_total ?? 0 }}</span>
+        </div>
+      </div>
+
+      <p class="card-summary">{{ item.summary }}</p>
+
+      <div class="card-footer">
+        <div class="meta-pills">
+          <span v-for="t in item.tags.slice(0, 3)" :key="t" class="status-badge badge-neutral">{{ t }}</span>
+        </div>
+        <span class="mono-size">{{ formatBytes(item.file_size) }}</span>
       </div>
     </div>
+  </LiquidGlass>
 
-    <h3 class="hw-title" :title="item.name">{{ item.name }}</h3>
-
-    <!-- Recessed OLED Readout -->
-    <div class="lcd-screen preset-lcd">
-      <div class="lcd-cell">
-        <span class="lcd-k">TEMP</span>
-        <span class="lcd-v">{{ item.metadata?.temperature ?? '—' }}</span>
-      </div>
-      <div class="lcd-cell">
-        <span class="lcd-k">TOP-P</span>
-        <span class="lcd-v">{{ item.metadata?.top_p ?? '—' }}</span>
-      </div>
-      <div class="lcd-cell">
-        <span class="lcd-k">CTX</span>
-        <span class="lcd-v">{{ formatNum(item.metadata?.max_context) }}</span>
-      </div>
-      <div class="lcd-cell">
-        <span class="lcd-k">PROMPTS</span>
-        <span class="lcd-v">{{ item.metadata?.prompts_enabled ?? 0 }}/{{ item.metadata?.prompts_total ?? 0 }}</span>
-      </div>
-    </div>
-
-    <p class="hw-summary">{{ item.summary }}</p>
-
-    <div class="card-footer hw-footer">
-      <div class="tag-row">
-        <span v-for="t in item.tags.slice(0, 3)" :key="t" class="hw-tag">{{ t }}</span>
-      </div>
-      <span class="mono-size">{{ formatBytes(item.file_size) }}</span>
-    </div>
-  </article>
-
-  <!-- GRID VIEW: THEME (Pantone Swatch Card taped to board) -->
-  <article
+  <!-- GRID VIEW: THEME (Liquid Glass Tile + Clear Glass Actions over Preview Scene) -->
+  <LiquidGlass
     v-else-if="item.category === 'theme'"
-    class="paper-card grid-card theme-card"
+    tag="article"
+    variant="surface"
+    :radius="24"
+    :bezel-width="22"
+    :blur="2"
+    :saturate="1.42"
+    :dispersion="true"
+    :max-dim="360"
+    :strength="0.72"
+    class="grid-card theme-card liquid-card-interactive"
+    tabindex="0"
     @click="emit('open', item)"
+    @keydown.enter.self="emit('open', item)"
   >
-    <span class="washi-tape"></span>
-
-    <div class="theme-preview-window" :style="{ background: item.metadata?.colors?.blur_tint || '#111622' }">
-      <div
-        class="mini-bubble"
-        :style="{
-          background: item.metadata?.colors?.bot_mes || 'rgba(20,24,36,0.72)',
-          borderColor: item.metadata?.colors?.border || 'rgba(255,255,255,0.18)',
-          color: item.metadata?.colors?.main_text || '#fff',
-        }"
-      >
-        <span :style="{ color: item.metadata?.colors?.quote_text || '#fff' }">“星尘落进夜色”</span>
-        <em :style="{ color: item.metadata?.colors?.italics_text || '#ff6b81' }"> *轻声低语*</em>
-      </div>
-
-      <div class="floating-actions">
-        <button
-          class="glass-btn"
-          :class="{ starred: item.favorite }"
-          title="收藏"
-          @click.stop="emit('toggle-favorite', item)"
+    <div class="card-layer">
+      <div class="theme-preview-window" :style="{ background: item.metadata?.colors?.blur_tint || '#25414A' }">
+        <div
+          class="mini-bubble"
+          :style="{
+            background: item.metadata?.colors?.bot_mes || 'rgba(20, 28, 34, 0.76)',
+            borderColor: item.metadata?.colors?.border || 'rgba(255, 255, 255, 0.2)',
+            color: item.metadata?.colors?.main_text || '#fff',
+          }"
         >
-          <Star :size="14" :fill="item.favorite ? 'currentColor' : 'none'" />
-        </button>
-        <a :href="getDownloadUrl(item.id)" class="glass-btn" title="下载" @click.stop>
-          <Download :size="14" />
-        </a>
-      </div>
-    </div>
-
-    <div class="swatch-strip">
-      <span
-        v-for="(sw, idx) in themeSwatches"
-        :key="idx"
-        class="swatch-chip"
-        :style="{ background: sw.color }"
-        :title="`${sw.label}: ${sw.color}`"
-      ></span>
-    </div>
-
-    <div class="card-body">
-      <div class="card-head-row">
-        <h3 class="paper-title" :title="item.name">{{ item.name }}</h3>
-        <span class="stamp-badge stamp-cobalt">THEME</span>
-      </div>
-      <p class="paper-summary">{{ item.summary }}</p>
-      <div class="card-footer paper-footer">
-        <div class="meta-pills">
-          <span class="stamp-badge stamp-ink">Blur {{ item.metadata?.blur_strength ?? 0 }}px</span>
-          <span v-if="item.metadata?.custom_css_lines" class="stamp-badge stamp-ink">
-            CSS {{ item.metadata.custom_css_lines }} 行
-          </span>
+          <span :style="{ color: item.metadata?.colors?.quote_text || '#fff' }">“星尘落进夜色”</span>
+          <em :style="{ color: item.metadata?.colors?.italics_text || '#a7d8d2' }"> *轻声低语*</em>
         </div>
-        <span class="mono-size">{{ formatBytes(item.file_size) }}</span>
+
+        <div class="floating-actions">
+          <LiquidGlass
+            tag="button"
+            type="button"
+            variant="clear"
+            :radius="999"
+            :bezel-width="8"
+            :dispersion="false"
+            :interactive="true"
+            class="clear-glass-icon-btn"
+            :class="{ starred: item.favorite }"
+            title="收藏"
+            aria-label="收藏"
+            @click.stop="emit('toggle-favorite', item)"
+          >
+            <Star :size="14" :fill="item.favorite ? 'currentColor' : 'none'" />
+          </LiquidGlass>
+          <LiquidGlass
+            tag="a"
+            :href="getDownloadUrl(item.id)"
+            variant="clear"
+            :radius="999"
+            :bezel-width="8"
+            :dispersion="false"
+            :interactive="true"
+            class="clear-glass-icon-btn"
+            title="下载原文件"
+            aria-label="下载原文件"
+            @click.stop
+          >
+            <Download :size="14" />
+          </LiquidGlass>
+        </div>
+      </div>
+
+      <div class="swatch-strip">
+        <span
+          v-for="(sw, idx) in themeSwatches"
+          :key="idx"
+          class="swatch-chip"
+          :style="{ background: sw.color }"
+          :title="`${sw.label}: ${sw.color}`"
+        ></span>
+      </div>
+
+      <div class="card-body">
+        <div class="card-head-row">
+          <h3 class="card-title" :title="item.name">{{ item.name }}</h3>
+          <span class="status-badge badge-sage">THEME</span>
+        </div>
+        <p class="card-summary">{{ item.summary }}</p>
+        <div class="card-footer">
+          <div class="meta-pills">
+            <span class="status-badge badge-neutral">Blur {{ item.metadata?.blur_strength ?? 0 }}px</span>
+            <span v-if="item.metadata?.custom_css_lines" class="status-badge badge-neutral">
+              CSS {{ item.metadata.custom_css_lines }} 行
+            </span>
+          </div>
+          <span class="mono-size">{{ formatBytes(item.file_size) }}</span>
+        </div>
       </div>
     </div>
-  </article>
+  </LiquidGlass>
 
-  <!-- GRID VIEW: CHARACTER / WORLDBOOK / OTHER (Pinned Polaroid / Index Card) -->
-  <article
+  <!-- GRID VIEW: CHARACTER / WORLDBOOK / OTHER (Liquid Glass Tile) -->
+  <LiquidGlass
     v-else
-    class="paper-card grid-card char-card"
+    tag="article"
+    variant="surface"
+    :radius="24"
+    :bezel-width="22"
+    :blur="2"
+    :saturate="1.42"
+    :dispersion="true"
+    :max-dim="360"
+    :strength="0.72"
+    class="grid-card liquid-card-interactive"
+    tabindex="0"
     @click="emit('open', item)"
+    @keydown.enter.self="emit('open', item)"
   >
-    <span
-      class="pin-magnet"
-      :class="
-        item.category === 'worldbook'
-          ? 'pin-mint'
-          : item.format === 'png'
-            ? 'pin-vermilion'
-            : 'pin-cobalt'
-      "
-    ></span>
+    <div class="card-layer">
+      <div v-if="item.category === 'character'" class="portrait-frame">
+        <img v-if="item.cover_url" :src="item.cover_url" :alt="item.name" loading="lazy" />
+        <div v-else class="portrait-placeholder">
+          <UserSquare2 :size="40" stroke-width="1.4" />
+          <span>无封面原画</span>
+        </div>
 
-    <div v-if="item.category === 'character'" class="portrait-frame">
-      <img v-if="item.cover_url" :src="item.cover_url" :alt="item.name" loading="lazy" />
-      <div v-else class="portrait-placeholder">
-        <UserSquare2 :size="42" stroke-width="1.4" />
-        <span>无封面原画</span>
-      </div>
-      <div class="glass-sheen"></div>
-
-      <div class="portrait-badges">
-        <span class="stamp-badge" :class="item.format === 'png' ? 'stamp-vermilion' : 'stamp-cobalt-solid'">
-          <ImageIcon v-if="item.format === 'png'" :size="10" />
-          <FileJson v-else :size="10" />
-          {{ item.format.toUpperCase() }}
-        </span>
-        <span v-if="item.metadata?.spec === 'chara_card_v3'" class="stamp-badge stamp-cobalt-solid">V3</span>
-        <span v-else-if="item.metadata?.spec === 'chara_card_v2'" class="stamp-badge glass-pill">V2</span>
-      </div>
-
-      <div class="floating-actions">
-        <button
-          class="glass-btn"
-          :class="{ starred: item.favorite }"
-          title="收藏"
-          @click.stop="emit('toggle-favorite', item)"
-        >
-          <Star :size="14" :fill="item.favorite ? 'currentColor' : 'none'" />
-        </button>
-        <a :href="getDownloadUrl(item.id)" class="glass-btn" title="下载原文件" @click.stop>
-          <Download :size="14" />
-        </a>
-      </div>
-    </div>
-
-    <div v-else class="index-banner" :class="`banner-${item.category}`">
-      <BookOpen v-if="item.category === 'worldbook'" :size="24" />
-      <Puzzle v-else :size="24" />
-      <span>{{ categoryLabel }}</span>
-      <div class="floating-actions">
-        <button
-          class="glass-btn light-action"
-          :class="{ starred: item.favorite }"
-          title="收藏"
-          @click.stop="emit('toggle-favorite', item)"
-        >
-          <Star :size="14" :fill="item.favorite ? 'currentColor' : 'none'" />
-        </button>
-        <a :href="getDownloadUrl(item.id)" class="glass-btn light-action" title="下载原文件" @click.stop>
-          <Download :size="14" />
-        </a>
-      </div>
-    </div>
-
-    <div class="card-body">
-      <div class="card-head-row">
-        <h3 class="paper-title" :title="item.name">{{ item.name }}</h3>
-      </div>
-      <div v-if="item.creator || item.folder" class="sub-meta">
-        <span v-if="item.creator">作者：{{ item.creator }}</span>
-        <span v-if="item.folder" class="folder-inline"><Folder :size="11" /> {{ item.folder }}</span>
-      </div>
-      <p class="paper-summary">{{ item.summary }}</p>
-
-      <div class="card-footer paper-footer">
-        <div class="meta-pills">
-          <span v-if="item.metadata?.worldbook_entries_count" class="stamp-badge stamp-mint">
-            世界书 {{ item.metadata.worldbook_entries_count }}
+        <div class="portrait-badges">
+          <span class="clear-badge-pill">
+            <ImageIcon v-if="item.format === 'png'" :size="11" />
+            <FileJson v-else :size="11" />
+            {{ item.format.toUpperCase() }}
           </span>
-          <span v-if="item.metadata?.alt_greetings_count" class="stamp-badge stamp-ink">
-            开场 {{ item.metadata.alt_greetings_count + 1 }}
-          </span>
-          <span v-if="item.metadata?.entries_count" class="stamp-badge stamp-mint">
-            词条 {{ item.metadata.entries_count }}
+          <span v-if="item.metadata?.spec === 'chara_card_v3'" class="clear-badge-pill">V3</span>
+          <span v-else-if="item.metadata?.spec === 'chara_card_v2'" class="clear-badge-pill">V2</span>
+        </div>
+
+        <div class="floating-actions">
+          <LiquidGlass
+            tag="button"
+            type="button"
+            variant="clear"
+            :radius="999"
+            :bezel-width="8"
+            :dispersion="false"
+            :interactive="true"
+            class="clear-glass-icon-btn"
+            :class="{ starred: item.favorite }"
+            title="收藏"
+            aria-label="收藏"
+            @click.stop="emit('toggle-favorite', item)"
+          >
+            <Star :size="14" :fill="item.favorite ? 'currentColor' : 'none'" />
+          </LiquidGlass>
+          <LiquidGlass
+            tag="a"
+            :href="getDownloadUrl(item.id)"
+            variant="clear"
+            :radius="999"
+            :bezel-width="8"
+            :dispersion="false"
+            :interactive="true"
+            class="clear-glass-icon-btn"
+            title="下载原文件"
+            aria-label="下载原文件"
+            @click.stop
+          >
+            <Download :size="14" />
+          </LiquidGlass>
+        </div>
+      </div>
+
+      <div v-else class="index-banner" :class="`banner-${item.category}`">
+        <div class="banner-label">
+          <BookOpen v-if="item.category === 'worldbook'" :size="20" />
+          <Puzzle v-else :size="20" />
+          <span>{{ categoryLabel }}</span>
+        </div>
+        <div class="card-inline-actions">
+          <button
+            type="button"
+            class="icon-action"
+            :class="{ starred: item.favorite }"
+            title="收藏"
+            aria-label="收藏"
+            @click.stop="emit('toggle-favorite', item)"
+          >
+            <Star :size="15" :fill="item.favorite ? 'currentColor' : 'none'" />
+          </button>
+          <a
+            :href="getDownloadUrl(item.id)"
+            class="icon-action"
+            title="下载原文件"
+            aria-label="下载原文件"
+            @click.stop
+          >
+            <Download :size="15" />
+          </a>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <div class="card-head-row">
+          <h3 class="card-title" :title="item.name">{{ item.name }}</h3>
+        </div>
+        <div v-if="item.creator || item.folder" class="sub-meta">
+          <span v-if="item.creator">作者：{{ item.creator }}</span>
+          <span v-if="item.folder" class="folder-inline">
+            <Folder :size="11" /> {{ item.folder }}
           </span>
         </div>
-        <span class="mono-size">{{ formatBytes(item.file_size) }}</span>
+        <p class="card-summary">{{ item.summary }}</p>
+
+        <div class="card-footer">
+          <div class="meta-pills">
+            <span v-if="item.metadata?.worldbook_entries_count" class="status-badge badge-sage">
+              世界书 {{ item.metadata.worldbook_entries_count }}
+            </span>
+            <span v-if="item.metadata?.alt_greetings_count" class="status-badge badge-neutral">
+              开场 {{ item.metadata.alt_greetings_count + 1 }}
+            </span>
+            <span v-if="item.metadata?.entries_count" class="status-badge badge-sage">
+              词条 {{ item.metadata.entries_count }}
+            </span>
+          </div>
+          <span class="mono-size">{{ formatBytes(item.file_size) }}</span>
+        </div>
       </div>
     </div>
-  </article>
+  </LiquidGlass>
 </template>
 
 <style scoped>
 .grid-card {
   display: flex;
   flex-direction: column;
-  overflow: visible;
+  overflow: hidden;
   cursor: pointer;
 }
 
-/* Polaroid-Style Portrait Frame */
+.card-layer {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.preset-layer {
+  padding: var(--spacing-24);
+  gap: var(--spacing-12);
+}
+
+/* Portrait Scene */
 .portrait-frame {
   position: relative;
-  height: 222px;
+  height: 224px;
   margin: 10px 10px 0;
-  border-radius: 8px;
+  border-radius: 17px;
   overflow: hidden;
-  background: var(--surface-well);
-  border: 1px solid var(--border-light);
-  box-shadow: inset 0 1px 4px rgba(15, 23, 42, 0.08);
+  background: var(--color-glass-scene);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  box-shadow: 0 4px 14px rgba(10, 22, 42, 0.14);
+}
+
+:root[data-theme='dark'] .portrait-frame {
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
 .portrait-frame img {
@@ -362,155 +475,217 @@ const formatNum = (n) => {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  color: var(--ink-muted);
-  font-size: 12px;
-}
-
-.glass-sheen {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.14) 0%, transparent 38%);
-  pointer-events: none;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: var(--text-label);
 }
 
 .portrait-badges {
   position: absolute;
-  left: 8px;
-  bottom: 8px;
+  left: 10px;
+  bottom: 10px;
   display: flex;
-  gap: 5px;
+  gap: 6px;
 }
 
-.glass-pill {
+.clear-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
   color: #ffffff;
-  background: rgba(15, 23, 42, 0.68);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(12, 24, 42, 0.44);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 .floating-actions {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 10px;
+  right: 10px;
   display: flex;
-  gap: 5px;
+  gap: 8px;
+  z-index: 5;
 }
 
-.glass-btn {
+/* Theme Preview Scene */
+.theme-preview-window {
+  position: relative;
+  height: 152px;
+  margin: 10px 10px 0;
+  border-radius: 17px;
+  padding: var(--spacing-16);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  box-shadow: 0 4px 14px rgba(10, 22, 42, 0.14);
+}
+
+:root[data-theme='dark'] .theme-preview-window {
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.mini-bubble {
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid;
+  font-size: 12.5px;
+  line-height: 1.45;
+  max-width: 85%;
+  backdrop-filter: blur(8px);
+}
+
+.swatch-strip {
+  display: flex;
+  gap: 6px;
+  padding: 12px 20px 0;
+}
+
+.swatch-chip {
+  flex: 1;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 1px 3px rgba(10, 22, 42, 0.12);
+}
+
+/* Non-portrait Index Banner */
+.index-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 0;
+}
+
+.banner-label {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: rgba(15, 23, 42, 0.62);
-  color: #f8fafc;
-  cursor: pointer;
-  text-decoration: none;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.24);
-  transition: transform 0.1s ease, background 0.15s ease;
+  gap: 8px;
+  font-size: var(--text-label);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-focus);
+  text-transform: uppercase;
 }
 
-.glass-btn:hover {
-  background: rgba(15, 23, 42, 0.85);
-  transform: scale(1.06);
+/* Preset Card */
+.card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.glass-btn.light-action {
-  background: var(--surface-card);
-  color: var(--ink-secondary);
-  border-color: var(--border-mid);
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.1);
+.preset-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
 }
 
-.glass-btn.light-action:hover {
-  background: var(--surface-elevated);
+.param-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-8);
+  padding: 10px;
+  border-radius: var(--radius-inner);
+  background: rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.48);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+:root[data-theme='dark'] .param-grid {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.param-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: center;
+}
+
+.param-k {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-muted);
+}
+
+.param-v {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: var(--font-weight-semibold);
   color: var(--ink-primary);
 }
 
-.glass-btn.starred,
-.mini-tool-btn.starred,
-.icon-action.starred {
-  color: #f59f00;
-}
-
-/* Index Banner for Worldbook / Other */
-.index-banner {
-  position: relative;
-  height: 88px;
-  margin: 10px 10px 0;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  font-weight: 700;
-  font-size: 14.5px;
-  border: 1px solid transparent;
-}
-
-.banner-worldbook {
-  color: var(--accent-mint-text);
-  background: var(--accent-mint-soft);
-  border-color: var(--accent-mint-border);
-}
-
-.banner-other {
-  color: var(--accent-cobalt-text);
-  background: var(--accent-cobalt-soft);
-  border-color: var(--accent-cobalt-border);
-}
-
-/* Card Body */
+/* Shared Card Body */
 .card-body {
-  padding: 12px 14px 13px;
+  padding: 14px 20px 18px;
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: var(--spacing-8);
   flex: 1;
 }
 
 .card-head-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--spacing-8);
 }
 
-.paper-title {
+.card-title {
   margin: 0;
-  font-family: var(--font-sans);
-  font-size: 15.5px;
-  font-weight: 700;
+  font-size: 16.5px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.3;
   color: var(--ink-primary);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.4);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+:root[data-theme='dark'] .card-title {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
 .sub-meta {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 11.5px;
+  flex-wrap: wrap;
+  font-size: var(--text-label);
   color: var(--ink-muted);
 }
 
-.folder-inline {
+.folder-inline,
+.folder-chip {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
+  font-size: var(--text-label);
+  color: var(--ink-secondary);
 }
 
-.paper-summary {
+.card-summary {
   margin: 0;
-  font-size: 12.5px;
-  line-height: 1.58;
+  font-size: 13.5px;
+  line-height: 1.52;
   color: var(--ink-secondary);
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   flex: 1;
@@ -520,221 +695,108 @@ const formatNum = (n) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--spacing-8);
   margin-top: auto;
-  padding-top: 9px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.38);
 }
 
-.paper-footer {
-  border-top: 1px dashed var(--border-light);
+:root[data-theme='dark'] .card-footer {
+  border-top-color: rgba(255, 255, 255, 0.12);
 }
 
 .meta-pills {
   display: flex;
+  align-items: center;
+  gap: 6px;
   flex-wrap: wrap;
-  gap: 5px;
 }
 
 .mono-size {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 11.5px;
   color: var(--ink-muted);
-  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-/* Preset Modern Hardware Module */
-.preset-card {
-  padding: 14px;
-  gap: 11px;
-}
-
-.hw-header {
+.card-inline-actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 4px;
 }
 
-.hw-left {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.hw-model {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  color: var(--ink-muted);
-}
-
-.card-actions {
-  display: flex;
-  gap: 6px;
-}
-
-.mini-tool-btn {
+.icon-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 27px;
-  height: 27px;
-  border-radius: 7px;
-  border: 1px solid var(--border-mid);
-  background: var(--surface-card);
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  background: transparent;
   color: var(--ink-secondary);
   cursor: pointer;
   text-decoration: none;
-  box-shadow: 0 1px 2px var(--btn-shadow-color);
-  transition: all 0.12s ease;
+  transition:
+    transform var(--ease-spring),
+    background 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
 }
 
-.mini-tool-btn:hover {
-  border-color: var(--border-strong);
+.icon-action:hover {
+  background: rgba(255, 255, 255, 0.36);
+  border-color: rgba(255, 255, 255, 0.52);
   color: var(--ink-primary);
 }
 
-.hw-title {
-  margin: 0;
-  font-family: var(--font-sans);
-  font-size: 15.5px;
-  font-weight: 700;
-  color: var(--ink-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+:root[data-theme='dark'] .icon-action:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
 }
 
-.preset-lcd {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px 10px;
-  padding: 10px 12px;
+.icon-action:active {
+  transform: scale(0.96);
+  transition: transform var(--ease-press);
 }
 
-.lcd-cell {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.icon-action.starred {
+  color: #d97706;
 }
 
-.lcd-k {
-  font-size: 9.5px;
-  color: var(--lcd-key);
-  letter-spacing: 0.08em;
-}
-
-.lcd-v {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--lcd-value);
-}
-
-.hw-summary {
-  margin: 0;
-  font-size: 12.5px;
-  line-height: 1.55;
-  color: var(--ink-secondary);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  flex: 1;
-}
-
-.hw-footer {
-  border-top: 1px dashed var(--border-mid);
-}
-
-.tag-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
-.hw-tag {
-  font-size: 10.5px;
-  padding: 2px 7px;
-  border-radius: 5px;
-  background: var(--surface-card);
-  border: 1px solid var(--border-mid);
-  color: var(--ink-secondary);
-}
-
-/* Theme Swatch Board */
-.theme-preview-window {
-  position: relative;
-  height: 128px;
-  margin: 10px 10px 0;
-  border-radius: 8px;
-  padding: 14px;
-  display: flex;
-  align-items: flex-end;
-  overflow: hidden;
-  border: 1px solid var(--border-mid);
-  box-shadow: inset 0 2px 8px rgba(15, 23, 42, 0.25);
-  background-image: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.08), transparent 60%);
-}
-
-.mini-bubble {
-  width: 100%;
-  padding: 9px 11px;
-  border-radius: 7px;
-  border: 1px solid;
-  font-size: 12px;
-  line-height: 1.4;
-  backdrop-filter: blur(8px);
-}
-
-.swatch-strip {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 10px 14px 0;
-}
-
-.swatch-chip {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 2px solid var(--surface-card);
-  box-shadow:
-    0 0 0 1px var(--border-mid),
-    0 2px 4px rgba(15, 23, 42, 0.16);
-}
-
-/* List View Row */
+/* List Row */
 .list-row {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 11px 14px;
+  gap: var(--spacing-16);
+  padding: var(--spacing-12) var(--spacing-16);
   cursor: pointer;
 }
 
+.list-thumb,
+.list-main,
+.list-meta {
+  position: relative;
+  z-index: 4;
+}
+
 .list-thumb {
-  width: 46px;
-  height: 46px;
-  border-radius: 8px;
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
   overflow: hidden;
-  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--surface-well);
-  color: var(--accent-cobalt);
-  border: 1px solid var(--border-light);
+  background: rgba(255, 255, 255, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: var(--color-focus);
+  flex-shrink: 0;
 }
 
-.thumb-worldbook {
-  background: var(--accent-mint-soft);
-  color: var(--accent-mint);
-}
-
-.thumb-preset {
-  background: linear-gradient(180deg, var(--lcd-bg-start) 0%, var(--lcd-bg-end) 100%);
-  color: var(--lcd-value);
-  border-color: var(--lcd-border);
+:root[data-theme='dark'] .list-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
 }
 
 .list-thumb img {
@@ -746,63 +808,36 @@ const formatNum = (n) => {
 .list-main {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .list-title-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-8);
   flex-wrap: wrap;
 }
 
 .list-title {
-  font-weight: 700;
-  font-size: 14.5px;
+  font-size: 15px;
+  font-weight: var(--font-weight-semibold);
   color: var(--ink-primary);
 }
 
 .list-summary {
-  margin-top: 3px;
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--ink-secondary);
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.folder-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 11px;
-  color: var(--ink-muted);
 }
 
 .list-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-8);
   flex-shrink: 0;
-}
-
-.icon-action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 7px;
-  border: 1px solid var(--border-light);
-  background: var(--surface-subtle);
-  color: var(--ink-secondary);
-  cursor: pointer;
-  text-decoration: none;
-  transition: all 0.12s ease;
-}
-
-.icon-action:hover {
-  background: var(--surface-well);
-  border-color: var(--border-mid);
-  color: var(--ink-primary);
 }
 </style>

@@ -169,7 +169,7 @@ const matchedIdSet = computed(() => new Set(renderedResult.value.matchedScripts.
       <button
         v-for="(g, idx) in greetings"
         :key="idx"
-        class="skeuo-btn skeuo-btn-paper"
+        class="glass-pill-btn compact"
         :class="{ 'active-pill': selectedGreeting === idx }"
         @click="selectedGreeting = idx"
       >
@@ -184,7 +184,7 @@ const matchedIdSet = computed(() => new Set(renderedResult.value.matchedScripts.
           <h4>{{ currentGreeting.title }}</h4>
           <span
             v-if="renderedResult.matchedScripts.length > 0"
-            class="stamp-badge stamp-mint"
+            class="status-badge badge-sage"
             :title="`已应用 ${renderedResult.matchedScripts.length} 条正则脚本`"
           >
             <Sparkles :size="10" />
@@ -192,7 +192,7 @@ const matchedIdSet = computed(() => new Set(renderedResult.value.matchedScripts.
           </span>
           <span
             v-else-if="scripts.length > 0"
-            class="stamp-badge stamp-ink"
+            class="status-badge badge-neutral"
             title="当前开场白未命中已启用的显示正则"
           >
             {{ scripts.length }} 条正则（未命中）
@@ -200,9 +200,9 @@ const matchedIdSet = computed(() => new Set(renderedResult.value.matchedScripts.
         </div>
 
         <div class="greeting-controls">
-          <div class="rocker-group mini-rocker">
+          <div class="segmented-group mini-rocker">
             <button
-              class="rocker-btn"
+              class="segmented-btn"
               :class="{ active: viewMode === 'rendered' }"
               title="应用正则与基础排版后的预览视图"
               @click="viewMode = 'rendered'"
@@ -211,7 +211,7 @@ const matchedIdSet = computed(() => new Set(renderedResult.value.matchedScripts.
               <span>正则渲染</span>
             </button>
             <button
-              class="rocker-btn"
+              class="segmented-btn"
               :class="{ active: viewMode === 'raw' }"
               title="查看未经正则处理的原始开场白文本"
               @click="viewMode = 'raw'"
@@ -223,7 +223,7 @@ const matchedIdSet = computed(() => new Set(renderedResult.value.matchedScripts.
 
           <button
             v-if="viewMode === 'rendered'"
-            class="skeuo-btn skeuo-btn-paper mini-btn"
+            class="glass-pill-btn compact mini-btn"
             :class="{ 'btn-active': showSettings }"
             title="展开正则与宏渲染选项"
             @click="showSettings = !showSettings"
@@ -234,14 +234,14 @@ const matchedIdSet = computed(() => new Set(renderedResult.value.matchedScripts.
 
           <button
             v-if="viewMode === 'rendered'"
-            class="skeuo-btn skeuo-btn-paper icon-only-btn"
+            class="glass-pill-btn compact icon-only-btn"
             title="放大弹窗预览"
             @click="fullscreenOpen = true"
           >
             <Maximize2 :size="12" />
           </button>
 
-          <button class="skeuo-btn skeuo-btn-paper mini-btn" @click="copyGreeting">
+          <button class="glass-pill-btn compact mini-btn" @click="copyGreeting">
             <Check v-if="copied" :size="12" />
             <Copy v-else :size="12" />
             <span>{{ copied ? '已复制' : '复制原文' }}</span>
@@ -338,7 +338,7 @@ const matchedIdSet = computed(() => new Set(renderedResult.value.matchedScripts.
       <template v-if="currentGreeting">
         <div class="modal-stage-bar">
           <div class="modal-tags">
-            <span v-if="renderedResult.matchedScripts.length > 0" class="stamp-badge stamp-mint">
+            <span v-if="renderedResult.matchedScripts.length > 0" class="status-badge badge-sage">
               <Sparkles :size="10" />
               命中 {{ renderedResult.matchedScripts.length }} 条正则
             </span>
@@ -377,19 +377,37 @@ const matchedIdSet = computed(() => new Set(renderedResult.value.matchedScripts.
 
 .active-pill {
   color: #ffffff !important;
-  background: var(--accent-cobalt) !important;
+  background: var(--color-focus) !important;
   border-color: #2b44b8 !important;
 }
 
 .parchment-block {
-  padding: 15px 17px;
-  border-radius: 10px;
-  background: var(--surface-card);
-  border: 1px solid var(--border-light);
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(240, 248, 255, 0.16) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.54);
+  box-shadow:
+    0 6px 22px rgba(15, 28, 52, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+:root[data-theme='dark'] .parchment-block {
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.09) 0%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 6px 22px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
 .greeting-header {
@@ -422,7 +440,7 @@ const matchedIdSet = computed(() => new Set(renderedResult.value.matchedScripts.
   flex-wrap: wrap;
 }
 
-.mini-rocker .rocker-btn {
+.mini-rocker .segmented-btn {
   padding: 4px 8px;
   font-size: 11.5px;
 }
@@ -437,9 +455,9 @@ const matchedIdSet = computed(() => new Set(renderedResult.value.matchedScripts.
 }
 
 .btn-active {
-  color: var(--accent-cobalt-text) !important;
-  background: var(--accent-cobalt-soft) !important;
-  border-color: var(--accent-cobalt-border) !important;
+  color: var(--color-focus) !important;
+  background: var(--accent-sage-soft) !important;
+  border-color: var(--accent-sage-border) !important;
 }
 
 .settings-drawer {
@@ -493,7 +511,7 @@ const matchedIdSet = computed(() => new Set(renderedResult.value.matchedScripts.
 }
 
 .mini-input:focus {
-  border-color: var(--accent-cobalt);
+  border-color: var(--color-focus);
 }
 
 .scripts-selector {
@@ -516,7 +534,7 @@ const matchedIdSet = computed(() => new Set(renderedResult.value.matchedScripts.
 .link-reset {
   border: none;
   background: transparent;
-  color: var(--accent-cobalt-text);
+  color: var(--color-focus);
   font-size: 11.5px;
   cursor: pointer;
   padding: 0;
@@ -535,7 +553,7 @@ const matchedIdSet = computed(() => new Set(renderedResult.value.matchedScripts.
   padding: 4px 8px;
   border-radius: 6px;
   border: 1px solid var(--border-light);
-  background: var(--surface-card);
+  background: var(--surface-solid-content);
   color: var(--ink-secondary);
   font-size: 11.5px;
   cursor: pointer;
@@ -544,13 +562,13 @@ const matchedIdSet = computed(() => new Set(renderedResult.value.matchedScripts.
 }
 
 .script-chip.checked {
-  border-color: var(--accent-cobalt-border);
+  border-color: var(--accent-sage-border);
   color: var(--ink-primary);
 }
 
 .script-chip.matched {
-  border-color: var(--accent-mint-border);
-  background: var(--accent-mint-soft);
+  border-color: var(--accent-sage-border);
+  background: var(--accent-sage-soft);
 }
 
 .chip-name {
@@ -569,7 +587,7 @@ const matchedIdSet = computed(() => new Set(renderedResult.value.matchedScripts.
 }
 
 .chip-tag.hit {
-  background: var(--accent-mint);
+  background: var(--color-focus);
   color: #fff;
 }
 
@@ -600,7 +618,7 @@ const matchedIdSet = computed(() => new Set(renderedResult.value.matchedScripts.
   font-style: normal;
   font-family: var(--font-mono);
   font-size: 10.5px;
-  color: var(--accent-mint-text);
+  color: var(--color-focus);
 }
 
 .iframe-shell {

@@ -3,6 +3,16 @@ import { ref } from 'vue';
 import { UploadCloud, X, FileText, Image as ImageIcon, CheckCircle2, AlertCircle } from 'lucide-vue-next';
 import { uploadFiles, formatBytes } from '../api/vault.js';
 import AppModal from './AppModal.vue';
+import GlassDropdown from './GlassDropdown.vue';
+
+const categoryOptions = [
+  { value: 'auto', label: '智能自动识别（推荐）' },
+  { value: 'character', label: '角色卡 (Character Card)' },
+  { value: 'preset', label: '对话预设 (Preset)' },
+  { value: 'theme', label: '界面主题 (Theme)' },
+  { value: 'worldbook', label: '世界书 (World Info)' },
+  { value: 'other', label: '正则与扩展 (Other)' },
+];
 
 defineProps({
   open: { type: Boolean, default: false },
@@ -97,7 +107,7 @@ async function submitUpload() {
     </div>
 
     <!-- Queued Files -->
-    <div v-if="queuedFiles.length" class="queue-list recessed-well">
+    <div v-if="queuedFiles.length" class="queue-list solid-input-well">
       <div v-for="(f, idx) in queuedFiles" :key="`${f.name}-${idx}`" class="queue-item">
         <div class="q-left">
           <ImageIcon v-if="f.name.toLowerCase().endsWith('.png')" :size="15" class="q-icon" />
@@ -113,17 +123,15 @@ async function submitUpload() {
 
     <!-- Metadata Options -->
     <div class="options-grid">
-      <label class="field-box">
+      <div class="field-box">
         <span>归档分类</span>
-        <select v-model="category" class="recessed-well field-input">
-          <option value="auto">智能自动识别（推荐）</option>
-          <option value="character">角色卡 (Character Card)</option>
-          <option value="preset">对话预设 (Preset)</option>
-          <option value="theme">界面主题 (Theme)</option>
-          <option value="worldbook">世界书 (World Info)</option>
-          <option value="other">正则与扩展 (Other)</option>
-        </select>
-      </label>
+        <GlassDropdown
+          v-model="category"
+          :options="categoryOptions"
+          variant="field"
+          aria-label="归档分类"
+        />
+      </div>
 
       <label class="field-box">
         <span>归入分组（可选）</span>
@@ -131,7 +139,7 @@ async function submitUpload() {
           v-model="folder"
           type="text"
           placeholder="例如：古风大世界 / Claude 常用"
-          class="recessed-well field-input"
+          class="solid-input-well field-input"
         />
       </label>
 
@@ -141,7 +149,7 @@ async function submitUpload() {
           v-model="tags"
           type="text"
           placeholder="例如：V3, 长篇, 暗黑主题"
-          class="recessed-well field-input"
+          class="solid-input-well field-input"
         />
       </label>
     </div>
@@ -152,44 +160,39 @@ async function submitUpload() {
     </div>
 
     <template #footer>
-      <button class="skeuo-btn" :disabled="uploading" @click="emit('close')">取消</button>
+      <button class="glass-pill-btn" :disabled="uploading" @click="emit('close')">取消</button>
       <button
-        class="skeuo-btn skeuo-btn-primary"
+        class="glass-pill-btn glass-btn-primary"
         :disabled="queuedFiles.length === 0 || uploading"
         @click="submitUpload"
       >
         <CheckCircle2 :size="15" />
-        <span>{{ uploading ? '正在解析归档…' : `确认贴入 (${queuedFiles.length})` }}</span>
+        <span>{{ uploading ? '正在解析归档…' : `确认导入 (${queuedFiles.length})` }}</span>
       </button>
     </template>
   </AppModal>
 </template>
 
 <style scoped>
-/* Blueprint Studio Drop Tray */
+/* Clean Liquid Glass Drop Tray */
 .drop-tray {
   padding: 28px 20px;
-  border-radius: 11px;
+  border-radius: 20px;
   text-align: center;
   cursor: pointer;
-  background:
-    radial-gradient(var(--accent-cobalt-border) 1px, transparent 1px),
-    var(--surface-subtle);
-  background-size: 18px 18px;
-  border: 2px dashed var(--accent-cobalt-border);
-  transition: all 0.16s ease;
+  background: var(--surface-well);
+  border: 1.5px dashed var(--accent-sage-border);
+  transition: border-color 160ms ease, background-color 160ms ease;
 }
 
 .drop-tray:hover,
 .drop-tray.dragging {
-  border-color: var(--accent-cobalt);
-  background:
-    radial-gradient(var(--accent-cobalt-border) 1px, transparent 1px),
-    var(--accent-cobalt-soft);
+  border-color: var(--color-focus);
+  background: var(--accent-sage-soft);
 }
 
 .tray-icon {
-  color: var(--accent-cobalt);
+  color: var(--color-focus);
   margin-bottom: 8px;
 }
 
@@ -221,7 +224,7 @@ async function submitUpload() {
   gap: 10px;
   padding: 6px 9px;
   border-radius: 7px;
-  background: var(--surface-card);
+  background: var(--surface-solid-content);
   border: 1px solid var(--border-light);
   font-size: 12.5px;
 }
@@ -234,7 +237,7 @@ async function submitUpload() {
 }
 
 .q-icon {
-  color: var(--accent-cobalt);
+  color: var(--color-focus);
   flex-shrink: 0;
 }
 
@@ -291,7 +294,7 @@ async function submitUpload() {
 }
 
 .field-input option {
-  background: var(--surface-card);
+  background: var(--surface-solid-content);
   color: var(--ink-primary);
 }
 

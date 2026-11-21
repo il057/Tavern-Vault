@@ -261,13 +261,19 @@ export function unwrapRenderableHtmlBlocks(input) {
   if (!input || typeof input !== 'string') return '';
   let text = input.replace(/\r\n/g, '\n');
   let nestedCounter = 0;
+  const stashed = [];
+  const stash = (html) => {
+    const idx = stashed.length;
+    stashed.push(html);
+    return `\uE000NESTED_${idx}\uE001`;
+  };
 
   // 1. Unwrap ```html ... ``` or renderable HTML fenced blocks
   text = text.replace(/```([a-zA-Z0-9_-]*)[ \t]*\n([\s\S]*?)```/g, (full, lang, code) => {
     if (isRenderableHtmlFence(lang, code)) {
       const trimmed = code.trim();
       if (isFullHtmlDocument(trimmed) || /<script[\s>]/i.test(trimmed)) {
-        return buildNestedIframeTag(trimmed, `nested-${++nestedCounter}`);
+        return stash(buildNestedIframeTag(trimmed, `nested-${++nestedCounter}`));
       }
       return trimmed;
     }
@@ -276,10 +282,11 @@ export function unwrapRenderableHtmlBlocks(input) {
 
   // 2. Isolate bare full HTML documents (<!doctype html>...</html> or <html>...</html>)
   text = text.replace(/(?:<!doctype\s+html[^>]*>\s*)?<html\b[^>]*>[\s\S]*?<\/html>/gi, (match) => {
-    return buildNestedIframeTag(match, `nested-${++nestedCounter}`);
+    return stash(buildNestedIframeTag(match, `nested-${++nestedCounter}`));
   });
 
-  return text;
+  // 3. Restore stashed nested iframes so step 2 never re-matches inside srcdoc attributes
+  return text.replace(/\uE000NESTED_(\d+)\uE001/g, (_, idx) => stashed[Number(idx)] ?? '');
 }
 
 /**
