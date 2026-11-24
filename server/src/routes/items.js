@@ -15,6 +15,64 @@ import {
 
 const router = express.Router();
 
+const zhNameCollator = new Intl.Collator('zh-Hans-CN-u-co-pinyin', {
+  sensitivity: 'base',
+  numeric: true,
+});
+
+function compareStringsAsc(a, b) {
+  return zhNameCollator.compare(String(a || '').trim(), String(b || '').trim());
+}
+
+function compareTimestampsDesc(a, b) {
+  return String(b || '').localeCompare(String(a || ''));
+}
+
+function sortItems(items, sort = 'created_desc', favoriteFirst = true) {
+  return items.sort((a, b) => {
+    if (favoriteFirst) {
+      const favDiff = (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0);
+      if (favDiff !== 0) return favDiff;
+    }
+
+    const aCreated = a._group_created_at || a.created_at || '';
+    const bCreated = b._group_created_at || b.created_at || '';
+    const aUpdated = a._group_updated_at || a.updated_at || '';
+    const bUpdated = b._group_updated_at || b.updated_at || '';
+
+    let cmp = 0;
+    switch (sort) {
+      case 'created_asc':
+        cmp = compareTimestampsDesc(bCreated, aCreated);
+        break;
+      case 'updated_desc':
+        cmp = compareTimestampsDesc(aUpdated, bUpdated);
+        break;
+      case 'name_asc':
+        cmp = compareStringsAsc(a.name, b.name);
+        break;
+      case 'name_desc':
+        cmp = compareStringsAsc(b.name, a.name);
+        break;
+      case 'size_desc':
+        cmp = (b.file_size || 0) - (a.file_size || 0);
+        break;
+      case 'size_asc':
+        cmp = (a.file_size || 0) - (b.file_size || 0);
+        break;
+      case 'created_desc':
+      default:
+        cmp = compareTimestampsDesc(aCreated, bCreated);
+        break;
+    }
+
+    if (cmp !== 0) return cmp;
+    const fallbackCreated = compareTimestampsDesc(aCreated, bCreated);
+    if (fallbackCreated !== 0) return fallbackCreated;
+    return compareStringsAsc(a.name, b.name);
+  });
+}
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
@@ -291,7 +349,16 @@ router.get('/stats', (_req, res) => {
 
 // GET /api/items
 router.get('/items', (req, res) => {
-  const { category, favorite, folder, tag, q, sort = 'updated_desc', grouped = 'true' } = req.query;
+  const {
+    category,
+    favorite,
+    folder,
+    tag,
+    q,
+    sort = 'created_desc',
+    favorite_first = 'true',
+    grouped = 'true',
+  } = req.query;
   const conditions = [];
   const params = [];
 
@@ -307,13 +374,10 @@ router.get('/items', (req, res) => {
     params.push(folder);
   }
 
-  let orderBy = 'updated_at DESC';
-  if (sort === 'created_desc') orderBy = 'created_at DESC';
-  else if (sort === 'name_asc') orderBy = 'name COLLATE NOCASE ASC';
-  else if (sort === 'size_desc') orderBy = 'file_size DESC';
+  const favoriteFirst = favorite_first !== 'false' && favorite_first !== '0';
 
   const whereSql = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
-  const rows = db.prepare(`SELECT * FROM items ${whereSql} ORDER BY ${orderBy}`).all(...params);
+  const rows = db.prepare(`SELECT * FROM items ${whereSql} ORDER BY favorite DESC, created_at DESC`).all(...params);
 
   let items = rows.map(serializeRow);
 
@@ -338,17 +402,10 @@ router.get('/items', (req, res) => {
 
   if (grouped !== 'false') {
     items = groupItemsByName(items);
-    if (sort === 'created_desc') {
-      items.sort((a, b) => String(b._group_created_at || '').localeCompare(String(a._group_created_at || '')));
-    } else if (sort === 'name_asc') {
-      items.sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN', { sensitivity: 'base' }));
-    } else if (sort === 'size_desc') {
-      items.sort((a, b) => (b.file_size || 0) - (a.file_size || 0));
-    } else {
-      items.sort((a, b) => String(b._group_updated_at || '').localeCompare(String(a._group_updated_at || '')));
-    }
+    sortItems(items, sort, favoriteFirst);
     items = items.map(({ _group_updated_at, _group_created_at, ...rest }) => rest);
   } else {
+    sortItems(items, sort, favoriteFirst);
     items = items.map((it) => ({ ...it, version_count: 1 }));
   }
 

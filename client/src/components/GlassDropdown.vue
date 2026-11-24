@@ -29,13 +29,13 @@ function updatePosition() {
   const el = rootRef.value || triggerRef.value;
   if (!el) return;
   const rect = el.getBoundingClientRect();
-  const estimatedHeight = Math.min(280, props.options.length * 38 + 16);
+  const estimatedHeight = Math.min(360, props.options.length * 39 + 16);
   const viewportW = document.documentElement.clientWidth || window.innerWidth;
   const viewportH = document.documentElement.clientHeight || window.innerHeight;
   const spaceBelow = viewportH - rect.bottom;
   const openUp = spaceBelow < estimatedHeight + 12 && rect.top > estimatedHeight + 12;
 
-  const width = rect.width;
+  const width = Math.max(rect.width, 176);
   let left = rect.left;
   if (left + width > viewportW - 8) {
     left = Math.max(8, viewportW - width - 8);
@@ -341,7 +341,7 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   gap: 3px;
-  max-height: 260px;
+  max-height: 350px;
   overflow-y: auto;
 }
 

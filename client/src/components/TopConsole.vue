@@ -1,25 +1,29 @@
 <script setup>
-import { Search, X, Upload, LayoutGrid, List, ArrowUpDown, Sun, Moon, Monitor } from 'lucide-vue-next';
+import { Search, X, Upload, LayoutGrid, List, ArrowUpDown, Star, Sun, Moon, Monitor } from 'lucide-vue-next';
 import { useTheme } from '../composables/useTheme.js';
 import LiquidGlass from './LiquidGlass.vue';
 import GlassDropdown from './GlassDropdown.vue';
 
 const sortOptions = [
+  { value: 'created_desc', label: '导入时间（最新）' },
+  { value: 'created_asc', label: '导入时间（最早）' },
   { value: 'updated_desc', label: '最近更新' },
-  { value: 'created_desc', label: '最新入库' },
-  { value: 'name_asc', label: '名称 A-Z' },
-  { value: 'size_desc', label: '体积从大到小' },
+  { value: 'name_asc', label: '名称首字母 A-Z' },
+  { value: 'name_desc', label: '名称首字母 Z-A' },
+  { value: 'size_desc', label: '体积（大 → 小）' },
+  { value: 'size_asc', label: '体积（小 → 大）' },
 ];
 
 defineProps({
   search: { type: String, default: '' },
-  sort: { type: String, default: 'updated_desc' },
+  sort: { type: String, default: 'created_desc' },
+  pinFavorites: { type: Boolean, default: true },
   viewMode: { type: String, default: 'grid' },
   totalShown: { type: Number, default: 0 },
   activeTitle: { type: String, default: '全部档案' },
 });
 
-const emit = defineEmits(['update:search', 'update:sort', 'update:viewMode', 'open-upload']);
+const emit = defineEmits(['update:search', 'update:sort', 'update:pinFavorites', 'update:viewMode', 'open-upload']);
 
 const { themeMode, setThemeMode } = useTheme();
 </script>
@@ -66,18 +70,32 @@ const { themeMode, setThemeMode } = useTheme();
     </div>
 
     <div class="console-right">
-      <!-- Sort Selector (Reusable Liquid Glass Dropdown) -->
-      <GlassDropdown
-        :model-value="sort"
-        :options="sortOptions"
-        variant="header"
-        aria-label="排序方式"
-        @update:model-value="emit('update:sort', $event)"
-      >
-        <template #prefix>
-          <ArrowUpDown :size="13" />
-        </template>
-      </GlassDropdown>
+      <!-- Sort Selector + Favorite-First Toggle -->
+      <div class="sort-cluster">
+        <GlassDropdown
+          :model-value="sort"
+          :options="sortOptions"
+          variant="header"
+          aria-label="排序方式"
+          @update:model-value="emit('update:sort', $event)"
+        >
+          <template #prefix>
+            <ArrowUpDown :size="13" />
+          </template>
+        </GlassDropdown>
+
+        <button
+          type="button"
+          class="pin-fav-btn"
+          :class="{ active: pinFavorites }"
+          :title="pinFavorites ? '星标最前：已开启（点击关闭）' : '星标最前：已关闭（点击开启）'"
+          :aria-label="pinFavorites ? '关闭星标最前' : '开启星标最前'"
+          :aria-pressed="pinFavorites"
+          @click="emit('update:pinFavorites', !pinFavorites)"
+        >
+          <Star :size="14" :fill="pinFavorites ? 'currentColor' : 'none'" />
+        </button>
+      </div>
 
       <!-- Theme Mode Segmented Control -->
       <div class="segmented-group console-segmented" role="group" aria-label="日夜模式切换">
@@ -259,6 +277,61 @@ const { themeMode, setThemeMode } = useTheme();
   align-items: center;
   gap: var(--spacing-8);
   flex-wrap: wrap;
+}
+
+.sort-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pin-fav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  background: rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.8);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 4px 12px rgba(10, 22, 42, 0.1);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    transform var(--ease-spring),
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 180ms ease;
+}
+
+.pin-fav-btn:hover {
+  background: rgba(255, 255, 255, 0.26);
+  border-color: rgba(255, 255, 255, 0.78);
+  color: #ffffff;
+}
+
+.pin-fav-btn:active {
+  transform: scale(0.95);
+  transition: transform var(--ease-press);
+}
+
+.pin-fav-btn.active {
+  color: #fde68a;
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.56) 0%, rgba(217, 119, 6, 0.62) 100%);
+  border-color: rgba(253, 230, 138, 0.78);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 4px 14px rgba(217, 119, 6, 0.28);
+}
+
+:root[data-theme='dark'] .pin-fav-btn.active {
+  color: #fcd34d;
+  background: linear-gradient(180deg, rgba(251, 191, 36, 0.3) 0%, rgba(217, 119, 6, 0.2) 100%);
+  border-color: rgba(251, 191, 36, 0.52);
 }
 
 .sort-well {

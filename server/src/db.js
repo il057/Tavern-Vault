@@ -48,6 +48,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_items_category ON items(category);
   CREATE INDEX IF NOT EXISTS idx_items_favorite ON items(favorite);
   CREATE INDEX IF NOT EXISTS idx_items_folder ON items(folder);
+  CREATE INDEX IF NOT EXISTS idx_items_created ON items(created_at);
   CREATE INDEX IF NOT EXISTS idx_items_updated ON items(updated_at);
   CREATE INDEX IF NOT EXISTS idx_items_cat_name ON items(category, name);
 `);

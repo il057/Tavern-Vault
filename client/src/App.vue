@@ -20,12 +20,41 @@ const stats = ref({
 const items = ref([]);
 const loading = ref(false);
 
+const VALID_SORTS = new Set([
+        'created_desc',
+        'created_asc',
+        'updated_desc',
+        'name_asc',
+        'name_desc',
+        'size_desc',
+        'size_asc',
+]);
+
+function readSavedSort() {
+        try {
+                const saved = localStorage.getItem('tavern-vault-sort');
+                return saved && VALID_SORTS.has(saved) ? saved : 'created_desc';
+        } catch {
+                return 'created_desc';
+        }
+}
+
+function readSavedPinFavorites() {
+        try {
+                const saved = localStorage.getItem('tavern-vault-pin-favorites');
+                return saved === null ? true : saved !== 'false';
+        } catch {
+                return true;
+        }
+}
+
 const activeCategory = ref('all');
 const onlyFavorites = ref(false);
 const activeFolder = ref('');
 const activeTag = ref('');
 const search = ref('');
-const sort = ref('updated_desc');
+const sort = ref(readSavedSort());
+const pinFavorites = ref(readSavedPinFavorites());
 const viewMode = ref('grid');
 
 const uploadOpen = ref(false);
@@ -68,6 +97,7 @@ async function loadAll() {
                                 tag: activeTag.value,
                                 q: search.value,
                                 sort: sort.value,
+                                favorite_first: pinFavorites.value ? 'true' : 'false',
                         }),
                 ]);
                 stats.value = s;
@@ -80,7 +110,23 @@ async function loadAll() {
 }
 
 let searchTimer = null;
-watch([activeCategory, onlyFavorites, activeFolder, activeTag, sort], () => {
+watch(sort, (val) => {
+        try {
+                localStorage.setItem('tavern-vault-sort', val);
+        } catch {
+                // ignore storage errors
+        }
+});
+
+watch(pinFavorites, (val) => {
+        try {
+                localStorage.setItem('tavern-vault-pin-favorites', String(val));
+        } catch {
+                // ignore storage errors
+        }
+});
+
+watch([activeCategory, onlyFavorites, activeFolder, activeTag, sort, pinFavorites], () => {
         loadAll();
 });
 
@@ -123,15 +169,8 @@ function selectTag(tag) {
 
 async function handleToggleFavorite(item) {
         try {
-                const res = await updateItem(item.id, { favorite: !item.favorite });
-                const idx = items.value.findIndex((i) => i.id === item.id);
-                if (idx !== -1) {
-                        items.value[idx] = {
-                                ...res.item,
-                                version_count: items.value[idx].version_count ?? 1,
-                        };
-                }
-                stats.value = await fetchStats();
+                await updateItem(item.id, { favorite: !item.favorite });
+                await loadAll();
         } catch (err) {
                 notify({ type: 'error', text: err.message });
         }
@@ -177,7 +216,8 @@ function handleItemDeleted() {
                 <main class="vault-main">
                         <!-- Floating Liquid Glass Bar -->
                         <div class="floating-console-wrap">
-                                <TopConsole v-model:search="search" v-model:sort="sort" v-model:view-mode="viewMode"
+                                <TopConsole v-model:search="search" v-model:sort="sort"
+                                        v-model:pin-favorites="pinFavorites" v-model:view-mode="viewMode"
                                         :total-shown="items.length" :active-title="activeTitle"
                                         @open-upload="uploadOpen = true" />
                         </div>
