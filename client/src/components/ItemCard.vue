@@ -11,6 +11,7 @@ import {
   Folder,
   FileJson,
   Image as ImageIcon,
+  Layers,
 } from 'lucide-vue-next';
 import { formatBytes, getDownloadUrl } from '../api/vault.js';
 import LiquidGlass from './LiquidGlass.vue';
@@ -52,6 +53,12 @@ const formatNum = (n) => {
   if (n >= 1000) return `${Math.round(n / 1000)}K`;
   return String(n);
 };
+
+const formattedVersion = computed(() => {
+  const v = (props.item.version || '').trim();
+  if (!v) return '';
+  return /^\d/.test(v) ? `v${v}` : v;
+});
 </script>
 
 <template>
@@ -84,6 +91,10 @@ const formatNum = (n) => {
     <div class="list-main">
       <div class="list-title-row">
         <span class="list-title">{{ item.name }}</span>
+        <span v-if="formattedVersion" class="status-badge badge-neutral">{{ formattedVersion }}</span>
+        <span v-if="item.version_count > 1" class="status-badge badge-sage version-stack-badge" :title="`共 ${item.version_count} 个版本，点击进入详情切换`">
+          <Layers :size="11" /> {{ item.version_count }} 版本
+        </span>
         <span class="status-badge" :class="item.format === 'png' ? 'badge-scene' : 'badge-sage'">
           {{ item.format.toUpperCase() }}
         </span>
@@ -141,6 +152,10 @@ const formatNum = (n) => {
         <div class="preset-kicker">
           <span class="status-dot" :class="item.metadata?.prompts_enabled > 0 ? 'active' : 'amber'"></span>
           <span>PRESET</span>
+          <span v-if="formattedVersion" class="status-badge badge-neutral">{{ formattedVersion }}</span>
+          <span v-if="item.version_count > 1" class="status-badge badge-sage version-stack-badge" :title="`共 ${item.version_count} 个版本`">
+            <Layers :size="11" /> {{ item.version_count }} 版本
+          </span>
         </div>
         <div class="card-inline-actions">
           <button
@@ -276,7 +291,12 @@ const formatNum = (n) => {
       <div class="card-body">
         <div class="card-head-row">
           <h3 class="card-title" :title="item.name">{{ item.name }}</h3>
-          <span class="status-badge badge-sage">THEME</span>
+          <div class="head-badges">
+            <span v-if="item.version_count > 1" class="status-badge badge-sage version-stack-badge" :title="`共 ${item.version_count} 个版本`">
+              <Layers :size="11" /> {{ item.version_count }} 版本
+            </span>
+            <span class="status-badge badge-sage">THEME</span>
+          </div>
         </div>
         <p class="card-summary">{{ item.summary }}</p>
         <div class="card-footer">
@@ -325,6 +345,15 @@ const formatNum = (n) => {
           </span>
           <span v-if="item.metadata?.spec === 'chara_card_v3'" class="clear-badge-pill">V3</span>
           <span v-else-if="item.metadata?.spec === 'chara_card_v2'" class="clear-badge-pill">V2</span>
+          <span v-if="formattedVersion" class="clear-badge-pill">{{ formattedVersion }}</span>
+          <span
+            v-if="item.version_count > 1"
+            class="clear-badge-pill version-pill-accent"
+            :title="`共 ${item.version_count} 个版本，打开详情可切换`"
+          >
+            <Layers :size="11" />
+            {{ item.version_count }} 版本
+          </span>
         </div>
 
         <div class="floating-actions">
@@ -394,6 +423,12 @@ const formatNum = (n) => {
       <div class="card-body">
         <div class="card-head-row">
           <h3 class="card-title" :title="item.name">{{ item.name }}</h3>
+          <div v-if="item.category !== 'character' && (formattedVersion || item.version_count > 1)" class="head-badges">
+            <span v-if="formattedVersion" class="status-badge badge-neutral">{{ formattedVersion }}</span>
+            <span v-if="item.version_count > 1" class="status-badge badge-sage version-stack-badge" :title="`共 ${item.version_count} 个版本`">
+              <Layers :size="11" /> {{ item.version_count }} 版本
+            </span>
+          </div>
         </div>
         <div v-if="item.creator || item.folder" class="sub-meta">
           <span v-if="item.creator">作者：{{ item.creator }}</span>
@@ -482,8 +517,10 @@ const formatNum = (n) => {
 .portrait-badges {
   position: absolute;
   left: 10px;
+  right: 10px;
   bottom: 10px;
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
 }
 
@@ -501,6 +538,25 @@ const formatNum = (n) => {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
+}
+
+.version-pill-accent {
+  background: rgba(37, 99, 235, 0.78);
+  border-color: rgba(191, 219, 254, 0.65);
+}
+
+.version-stack-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.head-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .floating-actions {

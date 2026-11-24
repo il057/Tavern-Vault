@@ -6,6 +6,12 @@ import multer from 'multer';
 import { db, FILES_DIR, COVERS_DIR, serializeRow } from '../db.js';
 import { parseUploadedFile } from '../parsers/detect.js';
 import { extractCharaFromPng, embedCharaIntoPng, isPngBuffer } from '../parsers/pngCard.js';
+import {
+  computeContentHash,
+  compareVersionsDesc,
+  getGroupKey,
+  groupItemsByName,
+} from '../utils/versioning.js';
 
 const router = express.Router();
 
@@ -222,9 +228,9 @@ function buildDetailPayload(row, json) {
 
 // GET /api/stats
 router.get('/stats', (_req, res) => {
-  const rows = db.prepare('SELECT category, favorite, file_size, tags, folder FROM items').all();
+  const rows = db.prepare('SELECT id, category, name, favorite, file_size, tags, folder FROM items').all();
   const counts = {
-    all: rows.length,
+    all: 0,
     character: 0,
     preset: 0,
     theme: 0,
@@ -233,41 +239,59 @@ router.get('/stats', (_req, res) => {
     favorite: 0,
   };
   let totalSize = 0;
-  const tagMap = new Map();
-  const folderMap = new Map();
+  const totalFiles = rows.length;
+
+  // Group by (category, normalized name) so sidebar counts match grouped cards in the grid
+  const groupSet = new Set();
+  const favGroupSet = new Set();
+  const folderGroupSets = new Map();
+  const tagGroupSets = new Map();
 
   for (const r of rows) {
-    if (counts[r.category] !== undefined) counts[r.category]++;
-    if (r.favorite) counts.favorite++;
     totalSize += r.file_size || 0;
+    const gKey = getGroupKey(r);
+
+    if (!groupSet.has(gKey)) {
+      groupSet.add(gKey);
+      counts.all++;
+      if (counts[r.category] !== undefined) counts[r.category]++;
+    }
+
+    if (r.favorite && !favGroupSet.has(gKey)) {
+      favGroupSet.add(gKey);
+      counts.favorite++;
+    }
 
     if (r.folder) {
-      folderMap.set(r.folder, (folderMap.get(r.folder) || 0) + 1);
+      if (!folderGroupSets.has(r.folder)) folderGroupSets.set(r.folder, new Set());
+      folderGroupSets.get(r.folder).add(gKey);
     }
+
     try {
       const tags = JSON.parse(r.tags || '[]');
       for (const t of tags) {
-        tagMap.set(t, (tagMap.get(t) || 0) + 1);
+        if (!tagGroupSets.has(t)) tagGroupSets.set(t, new Set());
+        tagGroupSets.get(t).add(gKey);
       }
     } catch {
       // ignore
     }
   }
 
-  const tags = Array.from(tagMap.entries())
-    .map(([name, count]) => ({ name, count }))
+  const tags = Array.from(tagGroupSets.entries())
+    .map(([name, set]) => ({ name, count: set.size }))
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
-  const folders = Array.from(folderMap.entries())
-    .map(([name, count]) => ({ name, count }))
+  const folders = Array.from(folderGroupSets.entries())
+    .map(([name, set]) => ({ name, count: set.size }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  res.json({ counts, totalSize, tags, folders });
+  res.json({ counts, totalSize, totalFiles, tags, folders });
 });
 
 // GET /api/items
 router.get('/items', (req, res) => {
-  const { category, favorite, folder, tag, q, sort = 'updated_desc' } = req.query;
+  const { category, favorite, folder, tag, q, sort = 'updated_desc', grouped = 'true' } = req.query;
   const conditions = [];
   const params = [];
 
@@ -312,6 +336,22 @@ router.get('/items', (req, res) => {
     });
   }
 
+  if (grouped !== 'false') {
+    items = groupItemsByName(items);
+    if (sort === 'created_desc') {
+      items.sort((a, b) => String(b._group_created_at || '').localeCompare(String(a._group_created_at || '')));
+    } else if (sort === 'name_asc') {
+      items.sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN', { sensitivity: 'base' }));
+    } else if (sort === 'size_desc') {
+      items.sort((a, b) => (b.file_size || 0) - (a.file_size || 0));
+    } else {
+      items.sort((a, b) => String(b._group_updated_at || '').localeCompare(String(a._group_updated_at || '')));
+    }
+    items = items.map(({ _group_updated_at, _group_created_at, ...rest }) => rest);
+  } else {
+    items = items.map((it) => ({ ...it, version_count: 1 }));
+  }
+
   res.json({ items });
 });
 
@@ -330,22 +370,41 @@ router.post('/items/upload', upload.array('files', 30), (req, res) => {
     .filter(Boolean);
 
   const created = [];
+  const skipped = [];
   const errors = [];
 
+  const findDupStmt = db.prepare('SELECT id, name, version, original_filename FROM items WHERE content_hash = ? LIMIT 1');
   const insertStmt = db.prepare(`
     INSERT INTO items (
       id, category, name, creator, version, format, original_filename,
       file_path, cover_path, file_size, summary, notes, folder, tags, metadata,
-      favorite, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
+      favorite, content_hash, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)
   `);
 
-  for (const file of files) {
+  const batchHashes = new Map();
+  const baseTime = Date.now();
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
     const originalFilename = fixFilenameEncoding(file.originalname);
     try {
       const parsed = parseUploadedFile(file.buffer, originalFilename, categoryOverride);
+      const contentHash = computeContentHash(file.buffer, parsed.format, parsed.parsedJson);
+
+      const existing = batchHashes.get(contentHash) || findDupStmt.get(contentHash);
+      if (existing) {
+        skipped.push({
+          filename: originalFilename,
+          name: existing.name,
+          existingId: existing.id,
+          reason: '内容完全相同，已跳过重复导入',
+        });
+        continue;
+      }
+
       const id = crypto.randomUUID();
-      const now = new Date().toISOString();
+      const now = new Date(baseTime + i).toISOString();
 
       const catDir = path.join(FILES_DIR, parsed.category);
       fs.mkdirSync(catDir, { recursive: true });
@@ -379,12 +438,15 @@ router.post('/items/upload', upload.array('files', 30), (req, res) => {
         folder,
         JSON.stringify(mergedTags),
         JSON.stringify(parsed.metadata || {}),
+        contentHash,
         now,
         now
       );
 
       const row = db.prepare('SELECT * FROM items WHERE id = ?').get(id);
-      created.push(serializeRow(row));
+      const serialized = serializeRow(row);
+      batchHashes.set(contentHash, { id: serialized.id, name: serialized.name });
+      created.push(serialized);
     } catch (err) {
       errors.push({
         filename: originalFilename,
@@ -393,11 +455,12 @@ router.post('/items/upload', upload.array('files', 30), (req, res) => {
     }
   }
 
-  if (created.length === 0 && errors.length > 0) {
+  if (created.length === 0 && skipped.length === 0 && errors.length > 0) {
     return res.status(400).json({ error: errors[0].error, errors });
   }
 
-  res.status(201).json({ created, errors });
+  const statusCode = created.length > 0 ? 201 : 200;
+  res.status(statusCode).json({ created, skipped, errors });
 });
 
 // GET /api/items/:id
@@ -413,9 +476,30 @@ router.get('/items/:id', (req, res) => {
     detail = { parseError: err.message };
   }
 
+  const siblings = db
+    .prepare('SELECT * FROM items WHERE category = ? AND LOWER(TRIM(name)) = LOWER(TRIM(?))')
+    .all(row.category, row.name);
+  siblings.sort(compareVersionsDesc);
+
+  const versions = siblings.map((v, idx) => ({
+    id: v.id,
+    version: v.version || '',
+    original_filename: v.original_filename,
+    format: v.format,
+    file_size: v.file_size,
+    favorite: Boolean(v.favorite),
+    created_at: v.created_at,
+    updated_at: v.updated_at,
+    is_latest: idx === 0,
+  }));
+
   res.json({
-    item: serializeRow(row),
+    item: {
+      ...serializeRow(row),
+      version_count: versions.length,
+    },
     detail,
+    versions,
   });
 });
 

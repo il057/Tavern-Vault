@@ -141,7 +141,10 @@ const navItems = [
           </div>
           <div class="gauge-meta">
             <span class="status-dot active"></span>
-            <span>SQLite 本地归档 · {{ stats.counts?.all ?? 0 }} 份</span>
+            <span v-if="stats.totalFiles && stats.totalFiles > (stats.counts?.all ?? 0)">
+              SQLite 归档 · {{ stats.counts?.all ?? 0 }} 张（含 {{ stats.totalFiles }} 个版本）
+            </span>
+            <span v-else>SQLite 本地归档 · {{ stats.counts?.all ?? 0 }} 份</span>
           </div>
         </div>
       </div>

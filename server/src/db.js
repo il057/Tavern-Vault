@@ -2,6 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
+import { extractCharaFromPng, isPngBuffer } from './parsers/pngCard.js';
+import { computeContentHash } from './utils/versioning.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const DATA_DIR = process.env.VAULT_DATA_DIR
@@ -38,6 +40,7 @@ db.exec(`
     tags TEXT DEFAULT '[]',
     metadata TEXT DEFAULT '{}',
     favorite INTEGER NOT NULL DEFAULT 0,
+    content_hash TEXT DEFAULT '',
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
   );
@@ -46,7 +49,42 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_items_favorite ON items(favorite);
   CREATE INDEX IF NOT EXISTS idx_items_folder ON items(folder);
   CREATE INDEX IF NOT EXISTS idx_items_updated ON items(updated_at);
+  CREATE INDEX IF NOT EXISTS idx_items_cat_name ON items(category, name);
 `);
+
+// Safe migration: add content_hash column to existing databases if missing
+const tableCols = db.prepare('PRAGMA table_info(items)').all();
+if (!tableCols.some((c) => c.name === 'content_hash')) {
+  db.exec(`ALTER TABLE items ADD COLUMN content_hash TEXT DEFAULT ''`);
+}
+db.exec(`CREATE INDEX IF NOT EXISTS idx_items_content_hash ON items(content_hash);`);
+
+// Backfill content_hash for any existing rows that predate deduplication
+function backfillContentHashes() {
+  const missing = db.prepare(`SELECT id, format, file_path FROM items WHERE content_hash IS NULL OR content_hash = ''`).all();
+  if (missing.length === 0) return;
+  const updateStmt = db.prepare('UPDATE items SET content_hash = ? WHERE id = ?');
+  for (const row of missing) {
+    try {
+      const fullPath = path.join(FILES_DIR, row.file_path);
+      if (!fs.existsSync(fullPath)) continue;
+      const buf = fs.readFileSync(fullPath);
+      let parsedJson = null;
+      if (row.format === 'png' || isPngBuffer(buf)) {
+        const extracted = extractCharaFromPng(buf);
+        parsedJson = extracted ? extracted.data : null;
+      } else {
+        parsedJson = JSON.parse(buf.toString('utf8'));
+      }
+      const hash = computeContentHash(buf, row.format, parsedJson);
+      updateStmt.run(hash, row.id);
+    } catch {
+      // Ignore unreadable legacy files during backfill
+    }
+  }
+}
+
+backfillContentHashes();
 
 export function serializeRow(row) {
   if (!row) return null;

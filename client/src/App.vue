@@ -125,7 +125,12 @@ async function handleToggleFavorite(item) {
         try {
                 const res = await updateItem(item.id, { favorite: !item.favorite });
                 const idx = items.value.findIndex((i) => i.id === item.id);
-                if (idx !== -1) items.value[idx] = res.item;
+                if (idx !== -1) {
+                        items.value[idx] = {
+                                ...res.item,
+                                version_count: items.value[idx].version_count ?? 1,
+                        };
+                }
                 stats.value = await fetchStats();
         } catch (err) {
                 notify({ type: 'error', text: err.message });
@@ -134,11 +139,20 @@ async function handleToggleFavorite(item) {
 
 function handleUploaded(res) {
         const okCount = res.created?.length || 0;
+        const skipCount = res.skipped?.length || 0;
         const errCount = res.errors?.length || 0;
         if (okCount > 0) {
+                const extras = [];
+                if (skipCount) extras.push(`跳过 ${skipCount} 份重复`);
+                if (errCount) extras.push(`${errCount} 份解析失败`);
                 notify({
                         type: 'success',
-                        text: `成功归档 ${okCount} 份档案${errCount ? `（${errCount} 份解析失败）` : ''}`,
+                        text: `成功归档 ${okCount} 份档案${extras.length ? `（${extras.join('，')}）` : ''}`,
+                });
+        } else if (skipCount > 0) {
+                notify({
+                        type: 'success',
+                        text: `检测到 ${skipCount} 份完全相同的档案，已跳过重复导入${errCount ? `（${errCount} 份解析失败）` : ''}`,
                 });
         }
         loadAll();

@@ -12,6 +12,8 @@ import {
         Search,
         Upload,
         Save,
+        History,
+        RotateCcw,
 } from 'lucide-vue-next';
 import {
         fetchItemDetail,
@@ -45,8 +47,11 @@ const props = defineProps({
 const emit = defineEmits(['close', 'updated', 'deleted', 'notify']);
 
 const loading = ref(false);
+const switchingVersion = ref(false);
+const activeItemId = ref(null);
 const item = ref(null);
 const detail = ref(null);
+const versions = ref([]);
 const activeTab = ref('overview');
 
 // Sub-filters
@@ -78,37 +83,99 @@ const coverInput = ref(null);
 const deleteModalOpen = ref(false);
 const deleting = ref(false);
 
-watch(
-        () => props.itemId,
-        async (id) => {
-                if (!id) {
-                        item.value = null;
-                        detail.value = null;
-                        return;
-                }
+async function loadVersion(id, { isSwitch = false } = {}) {
+        if (!id) {
+                activeItemId.value = null;
+                item.value = null;
+                detail.value = null;
+                versions.value = [];
+                return;
+        }
+
+        activeItemId.value = id;
+        if (isSwitch) {
+                switchingVersion.value = true;
+        } else {
                 loading.value = true;
                 activeTab.value = 'overview';
-                rawText.value = '';
-                rawTruncated.value = false;
                 wbSearch.value = '';
                 promptSearch.value = '';
                 promptFilter.value = 'all';
                 promptLimit.value = 60;
-                expandedKey.value = null;
+        }
+        rawText.value = '';
+        rawTruncated.value = false;
+        expandedKey.value = null;
 
-                try {
-                        const res = await fetchItemDetail(id);
-                        item.value = res.item;
-                        detail.value = res.detail;
-                        syncEditForm(res.item);
-                } catch (err) {
-                        emit('notify', { type: 'error', text: err.message || '加载档案详情失败' });
-                        emit('close');
-                } finally {
-                        loading.value = false;
+        try {
+                const res = await fetchItemDetail(id);
+                if (activeItemId.value !== id) return;
+                item.value = res.item;
+                detail.value = res.detail;
+                versions.value = res.versions || [];
+                syncEditForm(res.item);
+
+                if (isSwitch) {
+                        const validTabs = tabs.value.map((t) => t.key);
+                        if (!validTabs.includes(activeTab.value)) {
+                                activeTab.value = 'overview';
+                        } else if (activeTab.value === 'raw') {
+                                switchTab('raw');
+                        }
                 }
+        } catch (err) {
+                emit('notify', { type: 'error', text: err.message || '加载档案详情失败' });
+                if (!isSwitch) emit('close');
+        } finally {
+                loading.value = false;
+                switchingVersion.value = false;
+        }
+}
+
+watch(
+        () => props.itemId,
+        (id) => {
+                loadVersion(id, { isSwitch: false });
         },
         { immediate: true }
+);
+
+function selectVersion(id) {
+        if (!id || id === item.value?.id || switchingVersion.value) return;
+        loadVersion(id, { isSwitch: true });
+}
+
+function formatVersionDate(iso, withYear = false) {
+        if (!iso) return '';
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return iso;
+        const pad = (n) => String(n).padStart(2, '0');
+        const datePart = withYear
+                ? `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+                : `${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+        return `${datePart} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function versionPillLabel(v) {
+        if (!v) return '';
+        const ver = (v.version || '').trim();
+        if (ver) return /^\d/.test(ver) ? `v${ver}` : ver;
+        return formatVersionDate(v.created_at, false);
+}
+
+function versionTooltip(v) {
+        const parts = [];
+        parts.push(`文件：${v.original_filename}`);
+        parts.push(`版本：${v.version || '未标注（按导入时间排序）'}`);
+        parts.push(`导入时间：${formatVersionDate(v.created_at, true)}`);
+        parts.push(`大小：${formatBytes(v.file_size)}`);
+        return parts.join('\n');
+}
+
+const currentVersionInfo = computed(() => versions.value.find((v) => v.id === item.value?.id) || null);
+const latestVersion = computed(() => versions.value[0] || null);
+const isViewingOlderVersion = computed(
+        () => versions.value.length > 1 && Boolean(currentVersionInfo.value) && !currentVersionInfo.value.is_latest
 );
 
 function syncEditForm(it) {
@@ -277,8 +344,7 @@ async function saveEdit() {
                         notes: editForm.value.notes,
                         tags,
                 });
-                item.value = res.item;
-                syncEditForm(res.item);
+                await loadVersion(res.item.id, { isSwitch: true });
                 emit('updated', res.item);
                 emit('notify', { type: 'success', text: '档案元数据已保存' });
         } catch (err) {
@@ -346,11 +412,17 @@ function handleDelete() {
 async function confirmDelete() {
         if (!item.value || deleting.value) return;
         deleting.value = true;
+        const deletedId = item.value.id;
+        const remaining = versions.value.filter((v) => v.id !== deletedId);
         try {
-                await deleteItem(item.value.id);
+                await deleteItem(deletedId);
                 deleteModalOpen.value = false;
-                emit('deleted', item.value.id);
-                emit('close');
+                emit('deleted', deletedId);
+                if (remaining.length > 0) {
+                        await loadVersion(remaining[0].id, { isSwitch: true });
+                } else {
+                        emit('close');
+                }
         } catch (err) {
                 emit('notify', { type: 'error', text: err.message });
         } finally {
@@ -428,6 +500,40 @@ async function confirmDelete() {
                                                         </button>
                                                 </div>
                                         </header>
+
+                                        <!-- Version Switcher Strip (shown when multiple versions share the same name) -->
+                                        <div v-if="versions.length > 1" class="version-strip" :class="{ 'is-older': isViewingOlderVersion }">
+                                                <div class="version-strip-label">
+                                                        <History :size="14" />
+                                                        <span>版本 ({{ versions.length }})</span>
+                                                </div>
+                                                <div class="version-pills" role="tablist" aria-label="版本切换">
+                                                        <button
+                                                                v-for="v in versions"
+                                                                :key="v.id"
+                                                                type="button"
+                                                                class="version-pill"
+                                                                :class="{ active: v.id === item.id }"
+                                                                :disabled="switchingVersion"
+                                                                :title="versionTooltip(v)"
+                                                                @click="selectVersion(v.id)"
+                                                        >
+                                                                <span class="vp-main">{{ versionPillLabel(v) }}</span>
+                                                                <span v-if="v.version" class="vp-date">{{ formatVersionDate(v.created_at) }}</span>
+                                                                <span v-if="v.is_latest" class="vp-latest">最新</span>
+                                                        </button>
+                                                </div>
+                                                <button
+                                                        v-if="isViewingOlderVersion && latestVersion"
+                                                        type="button"
+                                                        class="version-back-btn"
+                                                        :disabled="switchingVersion"
+                                                        @click="selectVersion(latestVersion.id)"
+                                                >
+                                                        <RotateCcw :size="12" />
+                                                        <span>回到最新版</span>
+                                                </button>
+                                        </div>
 
                                         <!-- Physical Tab Dividers -->
                                         <div class="folio-tabs">
@@ -894,7 +1000,11 @@ async function confirmDelete() {
                         confirm-text="永久删除" cancel-text="取消" :danger="true" :loading="deleting" max-width="440px"
                         @close="deleteModalOpen = false" @confirm="confirmDelete">
                         <p style="margin: 0">
-                                确定要从本地仓库永久删除<strong>「{{ item?.name }}」</strong>吗？
+                                确定要从本地仓库永久删除<strong>「{{ item?.name }}」</strong>
+                                <template v-if="versions.length > 1 && currentVersionInfo">
+                                        的当前版本（<strong>{{ versionPillLabel(currentVersionInfo) }}</strong>）吗？其余 {{ versions.length - 1 }} 个版本将保留。
+                                </template>
+                                <template v-else>吗？</template>
                         </p>
                 </AppModal>
         </Teleport>
@@ -984,6 +1094,150 @@ async function confirmDelete() {
         align-items: center;
         gap: 8px;
         flex-wrap: wrap;
+}
+
+/* Version Switcher Strip */
+.version-strip {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px var(--spacing-24);
+        background: rgba(255, 255, 255, 0.18);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.36);
+        flex-wrap: wrap;
+}
+
+.version-strip.is-older {
+        background: rgba(245, 158, 11, 0.12);
+}
+
+:root[data-theme='dark'] .version-strip {
+        background: rgba(255, 255, 255, 0.04);
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme='dark'] .version-strip.is-older {
+        background: rgba(245, 158, 11, 0.1);
+}
+
+.version-strip-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--ink-secondary);
+        flex-shrink: 0;
+}
+
+.version-pills {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex: 1;
+        min-width: 0;
+        overflow-x: auto;
+        padding: 2px 0;
+}
+
+.version-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 30px;
+        padding: 0 11px;
+        border-radius: var(--radius-pill);
+        border: 1px solid rgba(255, 255, 255, 0.56);
+        background: rgba(255, 255, 255, 0.36);
+        color: var(--ink-secondary);
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        white-space: nowrap;
+        flex-shrink: 0;
+        transition: transform var(--ease-spring), background 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+:root[data-theme='dark'] .version-pill {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.16);
+}
+
+.version-pill:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.62);
+        border-color: rgba(255, 255, 255, 0.85);
+        color: var(--ink-primary);
+}
+
+:root[data-theme='dark'] .version-pill:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.16);
+        border-color: rgba(255, 255, 255, 0.3);
+}
+
+.version-pill.active {
+        color: #ffffff;
+        background: linear-gradient(180deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.94) 100%);
+        border-color: rgba(255, 255, 255, 0.5);
+        box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.45),
+                0 3px 10px rgba(37, 99, 235, 0.25);
+}
+
+:root[data-theme='dark'] .version-pill.active {
+        background: linear-gradient(180deg, rgba(96, 165, 250, 0.34) 0%, rgba(37, 99, 235, 0.28) 100%);
+        border-color: rgba(147, 197, 253, 0.52);
+}
+
+.vp-main {
+        font-family: var(--font-mono);
+        font-weight: 600;
+}
+
+.vp-date {
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        opacity: 0.72;
+}
+
+.vp-latest {
+        font-size: 10px;
+        font-weight: 600;
+        padding: 1px 6px;
+        border-radius: var(--radius-pill);
+        background: rgba(255, 255, 255, 0.28);
+        color: inherit;
+}
+
+.version-pill:not(.active) .vp-latest {
+        background: var(--accent-sage-soft);
+        color: var(--color-focus);
+}
+
+.version-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        min-height: 28px;
+        padding: 0 10px;
+        border-radius: var(--radius-pill);
+        border: 1px solid rgba(217, 119, 6, 0.42);
+        background: rgba(245, 158, 11, 0.16);
+        color: #b45309;
+        font-size: 11.5px;
+        font-weight: 600;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: background 150ms ease, transform var(--ease-spring);
+}
+
+:root[data-theme='dark'] .version-back-btn {
+        color: #fcd34d;
+        border-color: rgba(251, 191, 36, 0.38);
+        background: rgba(245, 158, 11, 0.18);
+}
+
+.version-back-btn:hover:not(:disabled) {
+        background: rgba(245, 158, 11, 0.28);
 }
 
 /* Seamless Liquid Glass Full-Width Tab Bar */
