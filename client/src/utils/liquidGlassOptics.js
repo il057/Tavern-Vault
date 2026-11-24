@@ -91,13 +91,15 @@ export function buildDisplacementMap({
   radius = 999,
   bezelWidth = 16,
   ior = 1.48,
-  maxDim = 1200,
+  maxDim = 320,
   strength = 1,
 }) {
   const w = Math.max(16, Math.round(width));
   const h = Math.max(16, Math.round(height));
 
-  const scaleFactor = Math.max(w, h) > maxDim ? maxDim / Math.max(w, h) : 1;
+  // Clamp canvas resolution to <= 320px; SVG feImage smoothly interpolates the gradient
+  const effectiveMaxDim = Math.min(maxDim, 320);
+  const scaleFactor = Math.max(w, h) > effectiveMaxDim ? effectiveMaxDim / Math.max(w, h) : 1;
   const cw = Math.max(16, Math.round(w * scaleFactor));
   const ch = Math.max(16, Math.round(h * scaleFactor));
 
@@ -112,9 +114,9 @@ export function buildDisplacementMap({
     return { dataUrl: '', maxDisp, width: w, height: h };
   }
 
-  // Quantize to 4px buckets so nearly identical cards share one cached displacement PNG
-  const qW = Math.max(16, Math.round(cw / 4) * 4);
-  const qH = Math.max(16, Math.round(ch / 4) * 4);
+  // Quantize to 8px buckets so similarly sized surfaces share one cached displacement PNG
+  const qW = Math.max(16, Math.round(cw / 8) * 8);
+  const qH = Math.max(16, Math.round(ch / 8) * 8);
   const qR = Math.round(effRadius);
   const qB = Math.round(effBezel);
   const cacheKey = `${qW}x${qH}:${qR}:${qB}:${ior}`;
@@ -134,26 +136,38 @@ export function buildDisplacementMap({
 
   const imgData = ctx.createImageData(qW, qH);
   const data = imgData.data;
+
+  // Bulk-fill entire buffer with neutral displacement (R=128, G=128, B=128, A=255)
+  const u32 = new Uint32Array(data.buffer);
+  u32.fill(0xff808080);
+
   const halfW = qW / 2;
   const halfH = qH / 2;
   const rClamped = Math.min(qR, halfW, halfH);
   const bClamped = Math.max(5, Math.min(qB, Math.min(qW, qH) * 0.42));
 
+  // Inner flat bounding box that is guaranteed to have distInside >= bClamped
+  const innerFlatHalfW = Math.max(0, halfW - bClamped - 1);
+  const innerFlatHalfH = Math.max(0, halfH - bClamped - 1);
+
   for (let y = 0; y < qH; y++) {
     const py = y + 0.5 - halfH;
+    const inFlatY = Math.abs(py) < innerFlatHalfH;
+
     for (let x = 0; x < qW; x++) {
       const px = x + 0.5 - halfW;
-      const idx = (y * qW + x) * 4;
+
+      // Fast-skip flat interior band
+      if (inFlatY && Math.abs(px) < innerFlatHalfW) {
+        const skipTo = Math.floor(halfW + innerFlatHalfW) - 1;
+        if (skipTo > x) x = skipTo;
+        continue;
+      }
 
       const sdf = roundedRectSDF(px, py, halfW, halfH, rClamped);
       const distInside = -sdf;
 
       if (distInside <= 0 || distInside >= bClamped) {
-        // Flat center or outside: zero displacement (neutral 128)
-        data[idx] = 128;
-        data[idx + 1] = 128;
-        data[idx + 2] = 128;
-        data[idx + 3] = 255;
         continue;
       }
 
@@ -167,10 +181,9 @@ export function buildDisplacementMap({
       const dx = -nx * refractedMag;
       const dy = -ny * refractedMag;
 
+      const idx = (y * qW + x) * 4;
       data[idx] = Math.round(128 + dx * 127);
       data[idx + 1] = Math.round(128 + dy * 127);
-      data[idx + 2] = 128;
-      data[idx + 3] = 255;
     }
   }
 

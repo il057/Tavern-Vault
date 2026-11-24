@@ -40,12 +40,8 @@ const navItems = [
       tag="aside"
       variant="surface"
       :radius="28"
-      :bezel-width="22"
-      :blur="3"
+      :blur="10"
       :saturate="1.45"
-      :dispersion="true"
-      :max-dim="640"
-      :strength="0.68"
       class="sidebar"
     >
       <div class="sidebar-inner">

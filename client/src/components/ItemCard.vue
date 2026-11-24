@@ -68,19 +68,15 @@ const formattedVersion = computed(() => {
     tag="div"
     variant="surface"
     :radius="20"
-    :bezel-width="16"
-    :blur="2"
-    :saturate="1.42"
-    :dispersion="true"
-    :max-dim="360"
-    :strength="0.65"
+    :blur="8"
+    :saturate="1.4"
     class="list-row liquid-card-interactive"
     tabindex="0"
     @click="emit('open', item)"
     @keydown.enter.self="emit('open', item)"
   >
     <div class="list-thumb" :class="`thumb-${item.category}`">
-      <img v-if="item.cover_url" :src="item.cover_url" :alt="item.name" />
+      <img v-if="item.cover_url" :src="item.cover_url" :alt="item.name" loading="lazy" decoding="async" />
       <UserSquare2 v-else-if="item.category === 'character'" :size="20" />
       <Sliders v-else-if="item.category === 'preset'" :size="20" />
       <Palette v-else-if="item.category === 'theme'" :size="20" />
@@ -136,12 +132,8 @@ const formattedVersion = computed(() => {
     tag="article"
     variant="surface"
     :radius="24"
-    :bezel-width="22"
-    :blur="2"
-    :saturate="1.42"
-    :dispersion="true"
-    :max-dim="360"
-    :strength="0.72"
+    :blur="8"
+    :saturate="1.4"
     class="grid-card preset-card liquid-card-interactive"
     tabindex="0"
     @click="emit('open', item)"
@@ -218,12 +210,8 @@ const formattedVersion = computed(() => {
     tag="article"
     variant="surface"
     :radius="24"
-    :bezel-width="22"
-    :blur="2"
-    :saturate="1.42"
-    :dispersion="true"
-    :max-dim="360"
-    :strength="0.72"
+    :blur="8"
+    :saturate="1.4"
     class="grid-card theme-card liquid-card-interactive"
     tabindex="0"
     @click="emit('open', item)"
@@ -244,14 +232,8 @@ const formattedVersion = computed(() => {
         </div>
 
         <div class="floating-actions">
-          <LiquidGlass
-            tag="button"
+          <button
             type="button"
-            variant="clear"
-            :radius="999"
-            :bezel-width="8"
-            :dispersion="false"
-            :interactive="true"
             class="clear-glass-icon-btn"
             :class="{ starred: item.favorite }"
             title="收藏"
@@ -259,22 +241,16 @@ const formattedVersion = computed(() => {
             @click.stop="emit('toggle-favorite', item)"
           >
             <Star :size="14" :fill="item.favorite ? 'currentColor' : 'none'" />
-          </LiquidGlass>
-          <LiquidGlass
-            tag="a"
+          </button>
+          <a
             :href="getDownloadUrl(item.id)"
-            variant="clear"
-            :radius="999"
-            :bezel-width="8"
-            :dispersion="false"
-            :interactive="true"
             class="clear-glass-icon-btn"
             title="下载原文件"
             aria-label="下载原文件"
             @click.stop
           >
             <Download :size="14" />
-          </LiquidGlass>
+          </a>
         </div>
       </div>
 
@@ -318,12 +294,8 @@ const formattedVersion = computed(() => {
     tag="article"
     variant="surface"
     :radius="24"
-    :bezel-width="22"
-    :blur="2"
-    :saturate="1.42"
-    :dispersion="true"
-    :max-dim="360"
-    :strength="0.72"
+    :blur="8"
+    :saturate="1.4"
     class="grid-card liquid-card-interactive"
     tabindex="0"
     @click="emit('open', item)"
@@ -331,7 +303,7 @@ const formattedVersion = computed(() => {
   >
     <div class="card-layer">
       <div v-if="item.category === 'character'" class="portrait-frame">
-        <img v-if="item.cover_url" :src="item.cover_url" :alt="item.name" loading="lazy" />
+        <img v-if="item.cover_url" :src="item.cover_url" :alt="item.name" loading="lazy" decoding="async" />
         <div v-else class="portrait-placeholder">
           <UserSquare2 :size="40" stroke-width="1.4" />
           <span>无封面原画</span>
@@ -357,14 +329,8 @@ const formattedVersion = computed(() => {
         </div>
 
         <div class="floating-actions">
-          <LiquidGlass
-            tag="button"
+          <button
             type="button"
-            variant="clear"
-            :radius="999"
-            :bezel-width="8"
-            :dispersion="false"
-            :interactive="true"
             class="clear-glass-icon-btn"
             :class="{ starred: item.favorite }"
             title="收藏"
@@ -372,22 +338,16 @@ const formattedVersion = computed(() => {
             @click.stop="emit('toggle-favorite', item)"
           >
             <Star :size="14" :fill="item.favorite ? 'currentColor' : 'none'" />
-          </LiquidGlass>
-          <LiquidGlass
-            tag="a"
+          </button>
+          <a
             :href="getDownloadUrl(item.id)"
-            variant="clear"
-            :radius="999"
-            :bezel-width="8"
-            :dispersion="false"
-            :interactive="true"
             class="clear-glass-icon-btn"
             title="下载原文件"
             aria-label="下载原文件"
             @click.stop
           >
             <Download :size="14" />
-          </LiquidGlass>
+          </a>
         </div>
       </div>
 
@@ -463,6 +423,8 @@ const formattedVersion = computed(() => {
   flex-direction: column;
   overflow: hidden;
   cursor: pointer;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 340px;
 }
 
 .card-layer {
@@ -533,11 +495,9 @@ const formattedVersion = computed(() => {
   font-size: 11px;
   font-weight: var(--font-weight-medium);
   color: #ffffff;
-  background: rgba(12, 24, 42, 0.44);
+  background: rgba(12, 24, 42, 0.64);
   border: 1px solid rgba(255, 255, 255, 0.34);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
 }
 
 .version-pill-accent {
@@ -593,7 +553,6 @@ const formattedVersion = computed(() => {
   font-size: 12.5px;
   line-height: 1.45;
   max-width: 85%;
-  backdrop-filter: blur(8px);
 }
 
 .swatch-strip {
@@ -827,6 +786,8 @@ const formattedVersion = computed(() => {
   gap: var(--spacing-16);
   padding: var(--spacing-12) var(--spacing-16);
   cursor: pointer;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 76px;
 }
 
 .list-thumb,

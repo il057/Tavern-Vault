@@ -33,10 +33,11 @@ const { themeMode, setThemeMode } = useTheme();
     tag="header"
     variant="clear"
     :radius="999"
-    :bezel-width="26"
-    :blur="0"
-    :saturate="1.3"
-    :dispersion="true"
+    :bezel-width="22"
+    :blur="4"
+    :saturate="1.35"
+    :refraction="true"
+    :dispersion="false"
     class="top-console"
   >
     <div class="console-left">

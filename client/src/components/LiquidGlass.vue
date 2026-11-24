@@ -9,16 +9,17 @@ const props = defineProps({
   bezelWidth: { type: Number, default: 24 },
   blur: { type: Number, default: 0 },
   saturate: { type: Number, default: 1.45 },
-  dispersion: { type: Boolean, default: true },
-  refraction: { type: Boolean, default: true },
+  dispersion: { type: Boolean, default: false },
+  refraction: { type: Boolean, default: false },
   strength: { type: Number, default: 1 },
-  maxDim: { type: Number, default: 1200 },
+  maxDim: { type: Number, default: 320 },
   interactive: { type: Boolean, default: false },
-  staticGlint: { type: Boolean, default: false },
+  staticGlint: { type: Boolean, default: true },
   disabled: { type: Boolean, default: false },
 });
 
 const hostRef = ref(null);
+const glintRef = ref(null);
 const uid = Math.random().toString(36).slice(2, 9);
 const filterId = `lg-filter-${uid}`;
 
@@ -26,13 +27,21 @@ const box = ref({ width: 0, height: 0 });
 const mapData = ref({ dataUrl: '', maxDisp: 10 });
 const chromiumSupported = ref(false);
 
-// Tactile spring state: press -> 0.96 (110ms), drag -> slight horizontal stretch, release -> 420ms settle
+// Tactile spring state (only used when interactive=true)
 const isPressed = ref(false);
 const dragStretch = ref({ x: 0, y: 0 });
-const pointerPos = ref({ x: 50, y: 0, active: false });
 
 let dragStart = null;
 let resizeObserver = null;
+let resizeRaf = 0;
+let glintRaf = 0;
+let cachedRect = null;
+let pendingPointer = null;
+
+const useSiblingBackdrop = computed(() => props.variant === 'sheet');
+const needsSvgRefraction = computed(
+  () => !useSiblingBackdrop.value && props.refraction && chromiumSupported.value
+);
 
 const resolvedBlur = computed(() => {
   return Number.isFinite(props.blur) ? props.blur : 0;
@@ -45,7 +54,7 @@ const numericRadius = computed(() => {
 });
 
 function regenerateMap() {
-  if (!props.refraction || !chromiumSupported.value) return;
+  if (!needsSvgRefraction.value) return;
   const { width, height } = box.value;
   if (width < 12 || height < 12) return;
   mapData.value = buildDisplacementMap({
@@ -58,39 +67,86 @@ function regenerateMap() {
   });
 }
 
-onMounted(() => {
-  chromiumSupported.value = isChromiumBackdropSupported();
+function setupResizeObserver() {
+  if (resizeObserver || !needsSvgRefraction.value) return;
   const el = hostRef.value;
   if (!el) return;
 
-  const measure = () => {
-    const rect = el.getBoundingClientRect();
-    const w = Math.round(rect.width);
-    const h = Math.round(rect.height);
-    if (w !== box.value.width || h !== box.value.height) {
-      box.value = { width: w, height: h };
+  const applySize = (w, h) => {
+    const rw = Math.round(w);
+    const rh = Math.round(h);
+    if (rw !== box.value.width || rh !== box.value.height) {
+      box.value = { width: rw, height: rh };
       regenerateMap();
     }
   };
 
-  measure();
+  const rect = el.getBoundingClientRect();
+  applySize(rect.width, rect.height);
+
   if (typeof ResizeObserver !== 'undefined') {
-    resizeObserver = new ResizeObserver(measure);
+    resizeObserver = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      const borderBox = entry.borderBoxSize?.[0];
+      const w = borderBox ? borderBox.inlineSize : entry.contentRect.width;
+      const h = borderBox ? borderBox.blockSize : entry.contentRect.height;
+      if (resizeRaf) cancelAnimationFrame(resizeRaf);
+      resizeRaf = requestAnimationFrame(() => {
+        resizeRaf = 0;
+        applySize(w, h);
+      });
+    });
     resizeObserver.observe(el);
   }
-});
+}
 
-onBeforeUnmount(() => {
+function teardownResizeObserver() {
+  if (resizeRaf) {
+    cancelAnimationFrame(resizeRaf);
+    resizeRaf = 0;
+  }
   if (resizeObserver) {
     resizeObserver.disconnect();
     resizeObserver = null;
   }
+}
+
+onMounted(() => {
+  chromiumSupported.value = isChromiumBackdropSupported();
+  if (needsSvgRefraction.value) {
+    setupResizeObserver();
+  }
+});
+
+onBeforeUnmount(() => {
+  teardownResizeObserver();
+  if (glintRaf) {
+    cancelAnimationFrame(glintRaf);
+    glintRaf = 0;
+  }
+  cachedRect = null;
+});
+
+watch(needsSvgRefraction, (active) => {
+  if (active) {
+    setupResizeObserver();
+  } else {
+    teardownResizeObserver();
+    mapData.value = { dataUrl: '', maxDisp: 10 };
+  }
 });
 
 watch(
-  () => [props.radius, props.bezelWidth, props.strength, props.refraction],
+  () => [props.radius, props.bezelWidth, props.strength],
   () => regenerateMap()
 );
+
+function onPointerEnter() {
+  if (!props.staticGlint && hostRef.value) {
+    cachedRect = hostRef.value.getBoundingClientRect();
+  }
+}
 
 function onPointerDown(e) {
   if (props.disabled) return;
@@ -100,16 +156,25 @@ function onPointerDown(e) {
   }
 }
 
+function flushGlint() {
+  glintRaf = 0;
+  const gEl = glintRef.value;
+  if (!gEl || !pendingPointer || !cachedRect || cachedRect.width <= 0 || cachedRect.height <= 0) return;
+  const x = Math.max(0, Math.min(100, ((pendingPointer.x - cachedRect.left) / cachedRect.width) * 100));
+  const y = Math.max(0, Math.min(100, ((pendingPointer.y - cachedRect.top) / cachedRect.height) * 100));
+  gEl.style.setProperty('--lg-gx', `${x.toFixed(1)}%`);
+  gEl.style.setProperty('--lg-gy', `${y.toFixed(1)}%`);
+  gEl.style.opacity = '0.72';
+}
+
 function onPointerMove(e) {
-  const el = hostRef.value;
-  if (el && !props.staticGlint) {
-    const rect = el.getBoundingClientRect();
-    if (rect.width > 0 && rect.height > 0) {
-      pointerPos.value = {
-        x: Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100)),
-        y: Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100)),
-        active: true,
-      };
+  if (!props.staticGlint) {
+    if (!cachedRect && hostRef.value) {
+      cachedRect = hostRef.value.getBoundingClientRect();
+    }
+    pendingPointer = { x: e.clientX, y: e.clientY };
+    if (!glintRaf) {
+      glintRaf = requestAnimationFrame(flushGlint);
     }
   }
 
@@ -123,30 +188,35 @@ function onPointerMove(e) {
 }
 
 function resetSpring() {
+  if (!isPressed.value && !dragStart) return;
   isPressed.value = false;
   dragStart = null;
   dragStretch.value = { x: 0, y: 0 };
 }
 
 function onPointerLeave() {
-  pointerPos.value.active = false;
+  cachedRect = null;
+  pendingPointer = null;
+  if (glintRaf) {
+    cancelAnimationFrame(glintRaf);
+    glintRaf = 0;
+  }
+  if (glintRef.value) {
+    glintRef.value.style.opacity = '0';
+  }
   resetSpring();
 }
 
-const useSiblingBackdrop = computed(() => props.variant === 'sheet');
-
 const backdropStyle = computed(() => {
   const borderRadius = numericRadius.value >= 999 ? '999px' : `${numericRadius.value}px`;
-  const useSvg =
-    !useSiblingBackdrop.value &&
-    props.refraction &&
-    chromiumSupported.value &&
-    Boolean(mapData.value.dataUrl);
+  const useSvg = needsSvgRefraction.value && Boolean(mapData.value.dataUrl);
   const blurPart = resolvedBlur.value > 0 ? ` blur(${resolvedBlur.value}px)` : '';
   const sat = Number.isFinite(props.saturate) ? props.saturate : 1.45;
   const backdropFilter = useSvg
     ? `url(#${filterId})${blurPart} saturate(${sat})`
-    : `blur(${Math.max(4, resolvedBlur.value)}px) saturate(${sat})`;
+    : resolvedBlur.value > 0
+      ? `blur(${resolvedBlur.value}px) saturate(${sat})`
+      : `blur(8px) saturate(${sat})`;
 
   let transform = '';
   if (props.interactive && isPressed.value) {
@@ -163,12 +233,12 @@ const backdropStyle = computed(() => {
   };
 });
 
-const glintStyle = computed(() => {
-  if (props.staticGlint || !pointerPos.value.active) return {};
-  const size = props.variant === 'surface' || props.variant === 'sheet' ? 240 : 150;
-  const alpha = props.variant === 'surface' ? 0.24 : 0.36;
+const glintStaticVars = computed(() => {
+  const size = props.variant === 'surface' || props.variant === 'sheet' ? '220px' : '150px';
+  const alpha = props.variant === 'surface' ? '0.22' : '0.32';
   return {
-    background: `radial-gradient(${size}px circle at ${pointerPos.value.x}% ${pointerPos.value.y}%, rgba(255, 255, 255, ${alpha}), transparent 70%)`,
+    '--lg-gsize': size,
+    '--lg-galpha': alpha,
   };
 });
 </script>
@@ -184,19 +254,20 @@ const glintStyle = computed(() => {
         'lg-interactive': interactive,
         'lg-pressed': interactive && isPressed,
         'lg-disabled': disabled,
-        'lg-refraction-active': refraction && chromiumSupported && Boolean(mapData.dataUrl),
+        'lg-refraction-active': needsSvgRefraction && Boolean(mapData.dataUrl),
       },
     ]"
     :style="backdropStyle"
-    @pointerdown="onPointerDown"
-    @pointermove="onPointerMove"
-    @pointerup="resetSpring"
-    @pointercancel="resetSpring"
-    @pointerleave="onPointerLeave"
+    @pointerenter="staticGlint ? undefined : onPointerEnter($event)"
+    @pointerdown="interactive ? onPointerDown($event) : undefined"
+    @pointermove="staticGlint && !interactive ? undefined : onPointerMove($event)"
+    @pointerup="interactive ? resetSpring() : undefined"
+    @pointercancel="interactive ? resetSpring() : undefined"
+    @pointerleave="staticGlint && !interactive ? undefined : onPointerLeave()"
   >
-    <!-- Optical SVG Displacement Filter (Chromium live backdrop refraction) -->
+    <!-- Optical SVG Displacement Filter (Chromium live backdrop refraction, opt-in only) -->
     <svg
-      v-if="refraction && chromiumSupported && mapData.dataUrl && box.width > 0 && box.height > 0"
+      v-if="needsSvgRefraction && mapData.dataUrl && box.width > 0 && box.height > 0"
       class="lg-svg-defs"
       aria-hidden="true"
       width="1"
@@ -223,7 +294,7 @@ const glintStyle = computed(() => {
             result="dispMap"
           />
           <template v-if="dispersion">
-            <!-- Optical RGB chromatic dispersion at curved edges (0 displacement in flat center) -->
+            <!-- Optical RGB chromatic dispersion at curved edges -->
             <feDisplacementMap
               in="SourceGraphic"
               in2="dispMap"
@@ -286,7 +357,13 @@ const glintStyle = computed(() => {
 
     <!-- Directional Specular Rim & Pointer Glint Overlay -->
     <span class="lg-specular-rim" aria-hidden="true"></span>
-    <span v-if="!staticGlint" class="lg-glint-layer" aria-hidden="true" :style="glintStyle"></span>
+    <span
+      v-if="!staticGlint"
+      ref="glintRef"
+      class="lg-glint-layer"
+      aria-hidden="true"
+      :style="glintStaticVars"
+    ></span>
 
     <slot />
   </component>
@@ -298,14 +375,13 @@ const glintStyle = computed(() => {
   backdrop-filter: var(--lg-backdrop);
   -webkit-backdrop-filter: var(--lg-backdrop);
   transition:
-    transform 420ms cubic-bezier(0.22, 1.32, 0.36, 1),
-    background 200ms ease,
-    border-color 200ms ease,
-    box-shadow 240ms ease;
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 160ms ease,
+    border-color 160ms ease;
 }
 
 .liquid-glass-surface.lg-pressed {
-  transition: transform 110ms cubic-bezier(0.2, 0, 0, 1);
+  transition: transform 90ms cubic-bezier(0.2, 0, 0, 1);
 }
 
 /* Specular Curved-Bezel Rim (bright top-left & subtle bottom-right caustic edge) */
@@ -429,8 +505,13 @@ const glintStyle = computed(() => {
   border-radius: inherit;
   pointer-events: none;
   z-index: 2;
-  opacity: 0.72;
-  transition: opacity 220ms ease;
+  opacity: 0;
+  background: radial-gradient(
+    var(--lg-gsize, 180px) circle at var(--lg-gx, 50%) var(--lg-gy, 0%),
+    rgba(255, 255, 255, var(--lg-galpha, 0.24)),
+    transparent 70%
+  );
+  transition: opacity 180ms ease;
 }
 
 .lg-disabled {

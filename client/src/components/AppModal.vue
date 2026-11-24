@@ -113,9 +113,7 @@ onBeforeUnmount(() => {
 .app-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: var(--backdrop-bg);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: rgba(10, 20, 38, 0.36);
   display: flex;
   align-items: center;
   justify-content: center;

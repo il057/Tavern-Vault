@@ -12,12 +12,12 @@ export async function fetchStats() {
   return handleJson(await fetch(`${API_BASE}/stats`));
 }
 
-export async function fetchItems(params = {}) {
+export async function fetchItems(params = {}, { signal } = {}) {
   const qs = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => {
     if (v !== undefined && v !== null && v !== '') qs.set(k, String(v));
   });
-  return handleJson(await fetch(`${API_BASE}/items?${qs.toString()}`));
+  return handleJson(await fetch(`${API_BASE}/items?${qs.toString()}`, { signal }));
 }
 
 export async function fetchItemDetail(id) {

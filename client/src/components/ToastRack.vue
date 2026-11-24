@@ -13,9 +13,7 @@ defineProps({
       :key="t.id"
       variant="tinted"
       :radius="999"
-      :bezel-width="14"
-      :blur="4"
-      :dispersion="true"
+      :blur="10"
       class="toast-pill"
       :class="t.type"
     >

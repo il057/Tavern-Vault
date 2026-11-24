@@ -1014,9 +1014,7 @@ async function confirmDelete() {
 .drawer-backdrop {
         position: fixed;
         inset: 0;
-        background: var(--backdrop-bg);
-        backdrop-filter: blur(6px);
-        -webkit-backdrop-filter: blur(6px);
+        background: rgba(10, 20, 38, 0.34);
         display: flex;
         justify-content: flex-end;
         padding: 14px;

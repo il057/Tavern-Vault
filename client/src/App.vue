@@ -85,12 +85,27 @@ function notify({ type = 'success', text }) {
         }, 3200);
 }
 
-async function loadAll() {
+let itemsAbortController = null;
+
+async function loadStats() {
+        try {
+                stats.value = await fetchStats();
+        } catch (err) {
+                notify({ type: 'error', text: err.message || '加载统计数据失败' });
+        }
+}
+
+async function loadItems() {
+        if (itemsAbortController) {
+                itemsAbortController.abort();
+        }
+        const controller = new AbortController();
+        itemsAbortController = controller;
+
         loading.value = true;
         try {
-                const [s, list] = await Promise.all([
-                        fetchStats(),
-                        fetchItems({
+                const list = await fetchItems(
+                        {
                                 category: onlyFavorites.value ? 'all' : activeCategory.value,
                                 favorite: onlyFavorites.value ? 'true' : '',
                                 folder: activeFolder.value,
@@ -98,15 +113,24 @@ async function loadAll() {
                                 q: search.value,
                                 sort: sort.value,
                                 favorite_first: pinFavorites.value ? 'true' : 'false',
-                        }),
-                ]);
-                stats.value = s;
-                items.value = list.items || [];
+                        },
+                        { signal: controller.signal }
+                );
+                if (itemsAbortController === controller) {
+                        items.value = list.items || [];
+                }
         } catch (err) {
+                if (err.name === 'AbortError') return;
                 notify({ type: 'error', text: err.message || '加载仓库数据失败' });
         } finally {
-                loading.value = false;
+                if (itemsAbortController === controller) {
+                        loading.value = false;
+                }
         }
+}
+
+async function loadAll() {
+        await Promise.all([loadStats(), loadItems()]);
 }
 
 let searchTimer = null;
@@ -127,14 +151,14 @@ watch(pinFavorites, (val) => {
 });
 
 watch([activeCategory, onlyFavorites, activeFolder, activeTag, sort, pinFavorites], () => {
-        loadAll();
+        loadItems();
 });
 
 watch(search, () => {
         clearTimeout(searchTimer);
         searchTimer = setTimeout(() => {
-                loadAll();
-        }, 180);
+                loadItems();
+        }, 160);
 });
 
 onMounted(loadAll);
@@ -168,10 +192,29 @@ function selectTag(tag) {
 }
 
 async function handleToggleFavorite(item) {
+        const nextFav = !item.favorite;
+        const prevFav = item.favorite;
+
+        // Optimistic update for instant UI feedback
+        item.favorite = nextFav;
+        if (stats.value?.counts) {
+                stats.value.counts.favorite = Math.max(0, (stats.value.counts.favorite || 0) + (nextFav ? 1 : -1));
+        }
+        if (onlyFavorites.value && !nextFav) {
+                items.value = items.value.filter((it) => it.id !== item.id);
+        }
+
         try {
-                await updateItem(item.id, { favorite: !item.favorite });
-                await loadAll();
+                await updateItem(item.id, { favorite: nextFav });
+                // Background sync to keep grouped stats & favorite-first ordering accurate
+                loadStats();
+                if (pinFavorites.value || onlyFavorites.value) {
+                        loadItems();
+                }
         } catch (err) {
+                // Rollback on failure
+                item.favorite = prevFav;
+                loadAll();
                 notify({ type: 'error', text: err.message });
         }
 }
@@ -245,8 +288,8 @@ function handleItemDeleted() {
                                 </div>
 
                                 <div v-else-if="items.length === 0" class="empty-well">
-                                        <LiquidGlass variant="clear" :radius="28" :bezel-width="24" :blur="2"
-                                                :saturate="1.4" :dispersion="true" class="empty-plaque">
+                                        <LiquidGlass variant="clear" :radius="28" :blur="8"
+                                                :saturate="1.4" class="empty-plaque">
                                                 <div class="empty-plaque-inner">
                                                         <h3>尚未找到匹配的档案</h3>
                                                         <p>支持直接导入 SillyTavern 角色卡（.png / .json）、对话预设、界面主题、世界书及正则脚本。</p>
